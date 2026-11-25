@@ -1,0 +1,23 @@
+{
+  "name": "yx-leadership-site",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build && node scripts/build-static.mjs && node scripts/prepare-sites-build.mjs",
+    "preview": "vite preview",
+    "check": "node --test tests/export.test.mjs tests/bootstrap.test.mjs",
+    "test:sites": "node --test tests/sites-worker.test.mjs"
+  },
+  "dependencies": {
+    "@vitejs/plugin-react": "5.0.4",
+    "react": "19.2.0",
+    "react-dom": "19.2.0",
+    "react-router-dom": "7.18.7",
+    "vite": "6.4.2"
+  },
+  "devDependencies": {
+    "esbuild": "0.25.12"
+  }
+}

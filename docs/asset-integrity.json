@@ -1,0 +1,80 @@
+{
+  "source_url": "https://botany-solid-84734790.figma.site/",
+  "captured_on": "2026-11-25",
+  "page_count": 24,
+  "image_count": 14,
+  "published_css_preserved": true,
+  "main_css_sha256": "edf5aa8fb7d3253320fa35b34952300177626ac237a4e9ca02ba72423deb6195",
+  "images": [
+    {
+      "file": "media/hero.jpg",
+      "size_bytes": 94059,
+      "sha256": "ddd215554d58c96c30fb3ea365bf01b23fd74f0207b8a558059acd337ff7e486"
+    },
+    {
+      "file": "media/image-69d67129f677.jpg",
+      "size_bytes": 114148,
+      "sha256": "248fa89012f02ee6480505c78be878590b6e86f13b2e088159364c21961b3c12"
+    },
+    {
+      "file": "media/image-7b6bc8dbc52f.jpg",
+      "size_bytes": 121280,
+      "sha256": "f638c8e8941a935f31b146f90ee07bce1668f9ac5943b6439f177c4fe7ff30bf"
+    },
+    {
+      "file": "media/image-7f9a18d44719.jpg",
+      "size_bytes": 123107,
+      "sha256": "152c0ab032f283b59560998c02209b2ab4fc47100bf52eebe5ed538dab2fa00a"
+    },
+    {
+      "file": "media/image-8b34262c3d06.jpg",
+      "size_bytes": 96937,
+      "sha256": "39c043f71a4c2e22fc9050f55f5785ad872702dbad3136e5546159c6e1a235fc"
+    },
+    {
+      "file": "media/image-913792b3e216.jpg",
+      "size_bytes": 51980,
+      "sha256": "4daa9e9bb3a67decb745a33f82518b650d4929b7f555610406992e646359f3ed"
+    },
+    {
+      "file": "media/image-a99c97ee29d9.jpg",
+      "size_bytes": 86284,
+      "sha256": "53ee378fb47292db85a912841c925180a7733f8de85998d096fe20a2f37038f5"
+    },
+    {
+      "file": "media/image-ace510ec655c.jpg",
+      "size_bytes": 171286,
+      "sha256": "03b0765274b0c0c0e99a0e0cdc67efb8f83063ed8aa2b22ca18ef7bcec8fecea"
+    },
+    {
+      "file": "media/image-b7adee66268e.jpg",
+      "size_bytes": 87010,
+      "sha256": "e24823363385ccea72325f372c0b8b269943aef680afe28f9cdfc4b2dfb264bd"
+    },
+    {
+      "file": "media/industry-biomedical.jpg",
+      "size_bytes": 192293,
+      "sha256": "74e31a3bad7a90c3af6901279554d8c93cd8b7aebfa3f9745f656438b55b4f99"
+    },
+    {
+      "file": "media/industry-global.jpg",
+      "size_bytes": 150958,
+      "sha256": "36805e001834f89495f2d2c520578f9508206879d66c581a869eaa6492cc0ee9"
+    },
+    {
+      "file": "media/industry-premium.jpg",
+      "size_bytes": 173217,
+      "sha256": "549e5389b2362ab60df697e732f170429879a9982a32a1e8ac5886fb67e04522"
+    },
+    {
+      "file": "media/industry-semiconductor.jpg",
+      "size_bytes": 99341,
+      "sha256": "30811aa4f50349fd9173f6a239526d54e27362ca545c620694d11b79359634ae"
+    },
+    {
+      "file": "media/logo.png",
+      "size_bytes": 103879,
+      "sha256": "cf0a61078bf4183da6e3553fcf8c79d51fcedd935bcca331f64fa19f803cebab"
+    }
+  ]
+}
