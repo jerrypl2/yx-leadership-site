@@ -48,9 +48,13 @@ test('static 404 offers a history-independent link for missing cases', async () 
   const script = html.match(/<script>([\s\S]*?)<\/script>/)?.[1];
   assert.ok(script);
 
-  for (const mount of ['/', '/yx-leadership-site/']) {
+  const projectName = process.env.GITHUB_REPOSITORY?.split('/').pop() || 'yx-leadership-site';
+  for (const mount of ['/', `/${projectName}/`]) {
     const base = new URL(mount, 'https://example.test');
-    for (const path of ['cases/999', 'cases/999/', 'cases/999/index.html?from=share#top', 'other/999']) {
+    for (const path of [
+      'cases/999', 'cases/999/', 'cases/999/index.html?from=share#top',
+      'other/999', 'archive/cases/999', 'missing?next=/cases/999',
+    ]) {
       const link = { href: fallback, hidden: false };
       const document = { getElementById: id => id === 'case-list' ? link : null };
       runInNewContext(script, { URL, location: new URL(path, base), document });
