@@ -59,6 +59,26 @@ await writeFile(join(out, '.nojekyll'), '');
 await writeFile(join(out, '404.html'), `<!doctype html>
 <html lang="zh-CN"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>页面未找到 · 悦心领导力中心</title>
-<style>body{margin:0;min-height:100vh;display:grid;place-items:center;text-align:center;font:16px/1.5 system-ui,sans-serif;color:#171717}h1{font-size:36px;font-weight:500}p{color:#717182}button{font:inherit;padding:12px 24px;border:0;border-radius:8px;background:#030213;color:white;cursor:pointer}</style>
-<main><h1>页面未找到</h1><p>您访问的页面可能已移动或不存在。</p><button onclick="history.back()">返回上一页</button></main></html>`);
+<style>body{margin:0;min-height:100vh;display:grid;place-items:center;text-align:center;font:16px/1.5 system-ui,sans-serif;color:#171717}h1{font-size:36px;font-weight:500}p{color:#717182}nav{display:flex;flex-wrap:wrap;gap:16px;align-items:center;justify-content:center}a{color:inherit}button{font:inherit;padding:12px 24px;border:0;border-radius:8px;background:#030213;color:white;cursor:pointer}</style>
+<main>
+  <h1>页面未找到</h1><p>您访问的页面可能已移动或不存在。</p>
+  <nav aria-label="页面导航">
+    <a id="case-list" href="https://www.amachina-yuexin.com/cases/">返回案例列表</a>
+    <button onclick="history.back()">返回上一页</button>
+  </nav>
+</main>
+<script>
+  const caseLink = document.getElementById('case-list');
+  const casesIndex = location.pathname.indexOf('/cases/');
+  if (casesIndex >= 0) {
+    const list = new URL(location.href);
+    list.pathname = location.pathname.slice(0, casesIndex) + '/cases/';
+    list.search = '';
+    list.hash = '';
+    caseLink.href = list.href;
+  } else {
+    caseLink.hidden = true;
+  }
+</script>
+</html>`);
 console.log(`Built ${routes.length} complete static pages in dist/client`);
