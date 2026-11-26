@@ -6,6 +6,7 @@
  * it does not send an email. See the migration documentation before production use.
  */
 import { createElement, forwardRef, useState } from "react";
+import { useLocation } from "react-router-dom";
 import { Link, useParams, siteHref } from "./navigation.jsx";
 import { asset } from "./assets.js";
 const logoSrc = asset(
@@ -73,6 +74,7 @@ function Header() {
   );
 }
 function Footer() {
+  const { pathname } = useLocation();
   return (
     <footer className="py-12 px-6 border-t border-border">
       <div className="max-w-7xl mx-auto">
@@ -149,6 +151,9 @@ function Footer() {
         </div>
         <div className="pt-8 border-t border-border text-sm text-muted-foreground text-center">
           {"© 2026 上海美鼎企业管理咨询有限公司。保留所有权利。"}
+          {pathname === "/" && (
+            <p className="mt-2 text-xs">测试版本 · Version 0.1</p>
+          )}
         </div>
       </div>
     </footer>
