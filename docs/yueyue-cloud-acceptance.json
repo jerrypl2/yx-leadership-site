@@ -1,0 +1,122 @@
+{
+  "date_local": "2026-11-27",
+  "timezone": "Australia/Sydney",
+  "connectivity_unauthenticated": {
+    "https://api.openai.com/v1/models": 401,
+    "https://git.chatgpt-team.site/": 400
+  },
+  "backend": {
+    "url": "https://yueyue-leadership-api.hejun-alvin.chatgpt.site",
+    "project_id": "appgprj_6b086fb62664819199db469660b8e9ec",
+    "source_commit": "1ca0d48aa5f6fd16b19d10dbf7ff367dcf9cdb87",
+    "version_id": "appgprj_6b086fb62664819199db469660b8e9ec~appgver_29c7965bf05c8191ad7425772224dc71",
+    "deployment_id": "appgprj_6b086fb62664819199db469660b8e9ec~appgdep_22def8d090d08191bd8c01040d063016",
+    "status": "succeeded",
+    "environment_revision": 1,
+    "audience": "owner-only"
+  },
+  "credential": {
+    "existing_key_reused": true,
+    "runtime_secret_configured": true,
+    "spend_limits_changed": false,
+    "secret_found_in_51_build_files": false
+  },
+  "checks": {
+    "automated_passed": 21,
+    "text_provider_http": 200,
+    "text_provider_elapsed_ms": 3719,
+    "text_provider_tokens": 1359,
+    "voice_total_seconds": 55
+  },
+  "hosted_text": [
+    {
+      "name": "anonymous-preflight",
+      "status": 401,
+      "elapsed_ms": 1148,
+      "cors": null,
+      "result": {
+        "response_type": "text/html; charset=utf-8"
+      }
+    },
+    {
+      "name": "private-preflight",
+      "status": 204,
+      "elapsed_ms": 618,
+      "cors": "https://www.amachina-yuexin.com",
+      "result": {
+        "response_type": null
+      }
+    },
+    {
+      "name": "hosted-real-text",
+      "status": 200,
+      "elapsed_ms": 1768,
+      "cors": "https://www.amachina-yuexin.com",
+      "result": {
+        "text": "您可以拨打悦心官网电话：**400-101-8877**，联系顾问。也可以发邮件至 **info@amachina.com**。",
+        "sources": [
+          "contact"
+        ]
+      }
+    }
+  ],
+  "voice_method": "A 4.59-second macOS-synthesized Chinese question was streamed over WebRTC through the deployed backend, using a server-side private Site service credential. This is real model audio, not a mocked provider. No physical microphone/browser-device test was performed.",
+  "final_voice": {
+    "input_transcript": "悦悦你好,请告诉我,怎样联系悦心的顾问?",
+    "output_transcript": "您可以拨打四零零,幺零幺,八八七七,或者写信到info@amachina.com。中心地址是上海市徐汇区沪闵路九三三五号徐汇万科中心G座三零六室。",
+    "events": [
+      "session.closed",
+      "session.input_transcript.delta",
+      "session.output_transcript.delta",
+      "session.started",
+      "session.usage.updated"
+    ],
+    "audio_frames": 1314,
+    "audio_peak_rms": 8185,
+    "http_status": 200,
+    "model": "gpt-live-1.1",
+    "peer_state": "connected",
+    "rtp": [
+      {
+        "type": "remote-inbound-rtp",
+        "kind": "audio",
+        "packetsReceived": 1279,
+        "packetsLost": 0
+      },
+      {
+        "type": "outbound-rtp",
+        "kind": "audio",
+        "packetsSent": 1309,
+        "bytesSent": 50490
+      },
+      {
+        "type": "remote-outbound-rtp",
+        "kind": "audio",
+        "packetsSent": 1278,
+        "bytesSent": 139436
+      },
+      {
+        "type": "inbound-rtp",
+        "kind": "audio",
+        "packetsReceived": 1308,
+        "packetsLost": 0
+      }
+    ],
+    "close_reason": "close_requested",
+    "usage": {
+      "active_seconds": 25,
+      "paused_seconds": 0,
+      "seconds": 25
+    },
+    "elapsed_seconds": 29.46,
+    "input_audio_bytes": 440500,
+    "transport_passed": true,
+    "contact_phone_passed": true,
+    "passed": true
+  },
+  "remaining": [
+    "Anonymous website requests currently receive 401 from Sites access control.",
+    "Public visitor access and merge/deploy of the frontend are not completed."
+  ],
+  "voice_fix": "The first call omitted the final 7 in the spoken phone number. Added an explicit digit-by-digit reading. The deployed regression call read 400-101-8877 completely."
+}
