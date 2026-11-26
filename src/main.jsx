@@ -11,10 +11,14 @@ if (pathname !== location.pathname) {
   history.replaceState(history.state, '', pathname + location.search + location.hash);
 }
 const root = document.getElementById("root");
-const initialContactValues = readContactValues(root);
+if (root) {
+  const initialContactValues = readContactValues(root);
 
-createRoot(root).render(
-  <React.StrictMode>
-    <BrowserRouter basename={siteBase}><App initialContactValues={initialContactValues} /></BrowserRouter>
-  </React.StrictMode>,
-);
+  createRoot(root).render(
+    <React.StrictMode>
+      <BrowserRouter basename={siteBase}><App initialContactValues={initialContactValues} /></BrowserRouter>
+    </React.StrictMode>,
+  );
+}
+
+import("./yueyue/Guide.jsx").then(({ mountGuide }) => mountGuide());
