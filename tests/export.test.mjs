@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import { readFile, stat } from 'node:fs/promises';
 import { resolve, join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { runInNewContext } from 'node:vm';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const output = join(root, 'dist/client');
@@ -39,6 +40,25 @@ for (const mount of ['/', '/yx-leadership-site/']) {
     }
   });
 }
+
+test('static 404 offers a history-independent link for missing cases', async () => {
+  const html = await readFile(join(output, '404.html'), 'utf8');
+  const fallback = html.match(/<a id="case-list" href="([^"]+)">返回案例列表<\/a>/)?.[1];
+  assert.equal(fallback, 'https://www.amachina-yuexin.com/cases/');
+  const script = html.match(/<script>([\s\S]*?)<\/script>/)?.[1];
+  assert.ok(script);
+
+  for (const mount of ['/', '/yx-leadership-site/']) {
+    const base = new URL(mount, 'https://example.test');
+    for (const path of ['cases/999', 'cases/999/', 'cases/999/index.html?from=share#top', 'other/999']) {
+      const link = { href: fallback, hidden: false };
+      const document = { getElementById: id => id === 'case-list' ? link : null };
+      runInNewContext(script, { URL, location: new URL(path, base), document });
+      assert.equal(link.hidden, !path.startsWith('cases/'));
+      if (!link.hidden) assert.equal(link.href, new URL('cases/', base).href);
+    }
+  }
+});
 
 test('contact form preserves the original required fields', async () => {
   const html = await readFile(join(output, 'contact/index.html'), 'utf8');
