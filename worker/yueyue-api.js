@@ -63,7 +63,7 @@ export function createHandler(upstream = fetch, clock = Date.now) {
     if (voice) {
       if (typeof payload.sdp !== 'string' || !/^v=0\r?\n/.test(payload.sdp) || !/^m=audio /m.test(payload.sdp)) return reply({error:'invalid_offer'}, 400);
       endpoint = 'live/sessions';
-      body = {session:{model:'gpt-live-1.1', instructions:guide + ' 这是实时语音通话。每次用一到三句作答，给访客留出接话的机会。\n' + facts},transport:{type:'webrtc',sdp:payload.sdp}};
+      body = {session:{model:'gpt-live-1.1', instructions:guide + ' 这是实时语音通话。每次用一到三句作答，给访客留出接话的机会。电话号码按数字逐位朗读，不合并或省略重复数字。官网电话 400-101-8877 必须完整读作“四零零，幺零幺，八八七七”，末尾有两个七。\n' + facts},transport:{type:'webrtc',sdp:payload.sdp}};
     } else {
       const question = typeof payload.question === 'string' ? payload.question.trim() : '';
       const history = payload.history ?? [];
