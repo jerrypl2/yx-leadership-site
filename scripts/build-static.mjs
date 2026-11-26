@@ -56,6 +56,9 @@ for (const route of routes) {
 }
 await writeFile(join(out, '.nojekyll'), '');
 // Keep unknown URLs self-contained, including deeply nested GitHub Pages 404s.
+const { name } = JSON.parse(await readFile(join(root, 'package.json'), 'utf8'));
+const projectName = process.env.GITHUB_REPOSITORY?.split('/').pop() || name;
+const caseListPaths = [`/${projectName}/cases/`, '/cases/'];
 await writeFile(join(out, '404.html'), `<!doctype html>
 <html lang="zh-CN"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>页面未找到 · 悦心领导力中心</title>
@@ -69,13 +72,9 @@ await writeFile(join(out, '404.html'), `<!doctype html>
 </main>
 <script>
   const caseLink = document.getElementById('case-list');
-  const casesIndex = location.pathname.indexOf('/cases/');
-  if (casesIndex >= 0) {
-    const list = new URL(location.href);
-    list.pathname = location.pathname.slice(0, casesIndex) + '/cases/';
-    list.search = '';
-    list.hash = '';
-    caseLink.href = list.href;
+  const listPath = ${JSON.stringify(caseListPaths)}.find(path => location.pathname.startsWith(path));
+  if (listPath) {
+    caseLink.href = new URL(listPath, location.href).href;
   } else {
     caseLink.hidden = true;
   }
