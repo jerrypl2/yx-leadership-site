@@ -79,5 +79,10 @@ await writeFile(join(out, '404.html'), `<!doctype html>
     caseLink.hidden = true;
   }
 </script>
+<script type="module">
+  const projectBase = ${JSON.stringify('/' + projectName + '/')};
+  const base = location.pathname.startsWith(projectBase) ? projectBase : '/';
+  import(base + ${JSON.stringify(appBundle)});
+</script>
 </html>`);
 console.log(`Built ${routes.length} complete static pages in dist/client`);
