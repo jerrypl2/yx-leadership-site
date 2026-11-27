@@ -80,6 +80,7 @@ export function ClassroomPage() {
     <header className="classroom-heading">
       <h1>悦心教室</h1>
       <p>查看近期公开课，向教务咨询适合你的班次。</p>
+      <Link className="business-back" to="/courses/">查看课程咨询目录</Link>
     </header>
     <section aria-labelledby="schedule-title">
       <div className="classroom-toolbar"><div><h2 id="schedule-title">2026 年 12 月公开课</h2>
@@ -96,7 +97,7 @@ export function ClassroomPage() {
           return <li key={session.id} ref={expanded ? activeRow : null}>
             <div className="classroom-row">
               <div className="classroom-date">{shortDates(session)}<small>{session.city}</small></div>
-              <div><h3>{session.title}</h3><p>待教务确认</p></div>
+              <div><h3><Link className="course-title-link" to={'/courses/'+session.courseId+'/'}>{session.title}</Link></h3><p>待教务确认</p></div>
               <Link to={'/classroom/?'+query.toString()} aria-expanded={expanded}
                 aria-label={(expanded?'收起咨询：':'咨询班次：') + session.title}
                 className="classroom-action">{expanded ? '收起咨询' : '咨询班次'}</Link>

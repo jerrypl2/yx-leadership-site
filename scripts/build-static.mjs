@@ -1,3 +1,4 @@
+import { businessPageTitle } from '../src/business/courses.js';
 import { buildVersion } from './site-version.mjs';
 import { build } from 'esbuild';
 import { readFile, writeFile, mkdir, cp } from 'node:fs/promises';
@@ -24,6 +25,8 @@ await cp(join(root, 'src/styles.css'), join(out, 'assets/site.css'));
 await cp(join(root, 'src/enhance.js'), join(out, 'assets/site.js'));
 
 function documentFor(route) {
+  const label = businessPageTitle(route);
+  const title = label ? label.replaceAll('&', '&amp;').replaceAll('<', '&lt;')+' · 悦心领导力中心' : 'YX Leadership Center';
   const segments = route.split('/').filter(Boolean);
   const prefix = segments.length ? '../'.repeat(segments.length) : './';
   const body = renderRoute(route).replace(/\b(href|src)="\/([^"\s]*)"/g, (_, attribute, target) => {
@@ -36,11 +39,11 @@ function documentFor(route) {
     return `${attribute}="${prefix}${target}"`;
   });
   return `<!doctype html>
-<html lang="en">
+<html lang="zh-CN">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>YX Leadership Center</title>
+  <title>${title}</title>
   <meta name="description" content="悦心领导力中心：在关键时刻，让关键的事发生。">
   <meta name="app-module" content="${prefix}${appBundle}">
   <link rel="stylesheet" href="${prefix}assets/site.css">

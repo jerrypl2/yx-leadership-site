@@ -1295,3 +1295,39 @@
   .classroom-fields { grid-template-columns: 1fr; gap: 0; }
   .classroom-inquiry { padding: 1rem; }
 }
+
+/* Business information uses the existing site palette, with text-first course cards. */
+.business-page { max-width: 70rem; margin: 0 auto; padding: 7.5rem 1.5rem 5rem; }
+.business-page h1 { font-size: clamp(2.15rem, 4vw, 3.15rem); line-height: 1.25; }
+.business-page h2 { font-size: 1.65rem; line-height: 1.4; }
+.business-page h3 { font-size: 1.15rem; line-height: 1.5; }
+.business-page p, .business-points { line-height: 1.8; }
+.business-page .business-intro { max-width: 46rem; margin: .9rem 0 2rem; color: var(--muted-foreground); font-size: 1.12rem; }
+.business-back, .business-entrance a, .business-links a, .enterprise-evidence a, .business-meta a, .course-title-link:hover { text-decoration: underline; text-underline-offset: .22em; }
+.business-back { display: inline-block; margin: .65rem 0 1.4rem; }
+.business-meta { margin: .7rem 0; color: var(--muted-foreground); }
+.business-entrance { margin: -1rem auto 1.5rem; text-align: center; }
+.course-search { display: grid; gap: .4rem; max-width: 34rem; }
+.course-search input { border: 1px solid var(--border); padding: .8rem; border-radius: .5rem; background: var(--background); }
+.course-count, .course-index small { color: var(--muted-foreground); font-size: .9rem; }
+.course-count { margin: 1rem 0 .75rem; }
+.course-index { display: grid; grid-template-columns: repeat(auto-fit,minmax(min(100%, 18rem),1fr)); gap: 1rem; }
+.course-index a { display: block; height: 100%; padding: 1.25rem; border-radius: .65rem; border: 1px solid var(--border); }
+.course-index a:hover { background: var(--muted); }
+.course-index h2 { font-size: 1.2rem; margin: .55rem 0; }
+.course-index p { color: var(--muted-foreground); }
+.course-detail, .enterprise-index { max-width: 59rem; }
+.course-detail section, .enterprise-topic, .business-related { margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid var(--border); }
+.course-detail section h2, .enterprise-topic h2, .business-related h2 { margin-bottom: .75rem; }
+.business-points { list-style: disc; padding-left: 1.4rem; }
+.business-points li { margin: .5rem 0; }
+.course-session { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 1rem; padding: 1.2rem; background: var(--muted); border-radius: .55rem; }
+.course-session p { color: var(--muted-foreground); }
+.business-button { display: inline-block; padding: .7rem 1.05rem; border-radius: .45rem; background: var(--primary); color: var(--primary-foreground); }
+.business-links, .enterprise-evidence { display:flex; flex-wrap:wrap; gap:.6rem 1.3rem; }
+.enterprise-topic, [id^="area-"] { scroll-margin-top: 5.5rem; }
+.enterprise-topic p { margin: .55rem 0; }
+.enterprise-evidence { flex-direction: column; align-items: start; margin: 1.1rem 0; }
+.business-subheading { margin: 1.2rem 0 .55rem; font-size: 1.1rem; }
+.enterprise-topic .business-button { margin-top: 1.35rem; }
+@media (max-width: 640px) { .business-page { padding: 6rem 1rem 3rem; } }

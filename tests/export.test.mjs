@@ -12,8 +12,8 @@ const routes = JSON.parse(await readFile(join(root, 'src/routes.json'), 'utf8'))
 const unescape = value => value.replaceAll('&amp;', '&');
 
 for (const mount of ['/', '/yx-leadership-site/']) {
-  test(`24 pages and all local links/assets resolve under ${mount}`, async () => {
-    assert.equal(routes.length, 24);
+  test(`${routes.length} pages and all local links/assets resolve under ${mount}`, async () => {
+    assert.equal(new Set(routes).size, routes.length);
     for (const route of routes) {
       const html = await readFile(join(output, route.slice(1), 'index.html'), 'utf8');
       assert.match(html, /<div id="root">/);
@@ -90,4 +90,34 @@ test('homepage version survives static export and increments as an integer on th
   assert.equal(nextVersion(homepage),major+'.'+(Number(minor)+1));
   assert.equal(nextVersion('<p>测试版本 · Version 0.9</p>'),'0.10');
   assert.throws(()=>nextVersion('<h1>Unavailable</h1>'));
+});
+
+test('every published course has one canonical detail page, its aliases and the matching inquiry', async () => {
+  const {courses} = await import('../src/business/courses.js');
+  const {sessions} = await import('../src/classroom/catalog.js');
+  const {topics} = await import('../src/business/topics.js');
+  assert.equal(courses.length,15);
+  assert.equal(new Set(courses.map(course=>course.id)).size,15);
+  assert.equal(topics.length,5);
+  const index = await readFile(join(output,'courses/index.html'),'utf8');
+  const catalogPaths = routes.filter(path=>/^\/courses\/\d+$/.test(path));
+  assert.equal(catalogPaths.length,courses.length);
+  for (const course of courses) {
+    assert.ok(catalogPaths.includes('/courses/'+course.id));
+    const html = await readFile(join(output,'courses',course.id,'index.html'),'utf8');
+    assert.ok(html.includes('<title>'+course.title+' · 悦心领导力中心</title>'));
+    const scheduled=sessions.filter(item=>item.courseId===course.id);
+    assert.ok(scheduled.length);
+    assert.ok(index.includes(course.title));
+    if (course.alias) assert.ok(index.includes(course.alias) && html.includes(course.alias));
+    for (const session of scheduled) {
+      assert.equal(session.title,course.title);
+      assert.ok(html.includes('classroom/?session='+session.id));
+    }
+  }
+  const enterprise = await readFile(join(output,'solutions/index.html'),'utf8');
+  for (const topic of topics) {
+    assert.ok(enterprise.includes('contact/?topic='+topic.id));
+    assert.ok(topic.courseIds.every(id=>courses.some(course=>course.id===id)));
+  }
 });

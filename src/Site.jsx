@@ -7,6 +7,9 @@ import { createElement, forwardRef, useEffect, useRef, useState } from "react";
 import { useLocation } from "react-router-dom";
 import { Link, useParams, siteHref } from "./navigation.jsx";
 import { emptyContact, identifyAttempt, forgetAttempt, saveContact } from "./contact.js";
+import { topics } from "./business/topics.js";
+import { courses } from "./business/courses.js";
+import { CourseLinks } from "./business/BusinessPages.jsx";
 import { ClassroomPage } from "./classroom/ClassroomPage.jsx";
 import { asset } from "./assets.js";
 const logoSrc = asset(
@@ -1024,6 +1027,7 @@ function HomeSolutions() {
             {"使得事情在不断沟通与调整中反复消耗，始终难以形成实质进展。"}
           </p>
         </div>
+        <p className="business-entrance"><Link to="/solutions/">按五类业务需求查看企业培训</Link></p>
         <div className="grid md:grid-cols-2 gap-8">
           {solutionCards.map((e) => (
             <Link
@@ -1603,7 +1607,7 @@ function CapabilityMapPage() {
               const _SectionIcon = e.icon;
               return (
                 <div
-                  key={e.id}
+                  key={e.id} id={'area-'+e.id}
                   className="relative bg-gradient-to-br from-background via-background to-primary/5 rounded-2xl p-8 border border-border"
                 >
                   <div className="flex items-start gap-6 mb-8">
@@ -1670,6 +1674,8 @@ function CapabilityMapPage() {
                       </ul>
                     </div>
                   </div>
+                  <h3 className="business-subheading">相关课程</h3>
+                  <CourseLinks items={courses.filter(c=>c.area===e.id)} />
                 </div>
               );
             })}
@@ -1680,7 +1686,12 @@ function CapabilityMapPage() {
   );
 }
 function ContactPage({ initialValues } = {}) {
-  const [formData, setFormData] = useState(() => initialValues ?? emptyContact);
+  const {search} = useLocation();
+  const topic = topics.find(t => t.id === new URLSearchParams(search).get('topic'));
+  const [formData, setFormData] = useState(() => ({
+    ...emptyContact, ...initialValues,
+    message: initialValues?.message || (topic ? '我想咨询'+topic.name+'。' : ''),
+  }));
   const [ready, setReady] = useState(false);
   const [busy, setBusy] = useState(false);
   const [status, setStatus] = useState("");
@@ -1960,7 +1971,7 @@ function ContactPage({ initialValues } = {}) {
     </div>
   );
 }
-const caseSummaries = [
+export const caseSummaries = [
   {
     id: 1,
     title: "当每个部门都在努力，事情却推进不下去",
@@ -2436,6 +2447,10 @@ function CaseDetailPage() {
               </div>
             ))}
           </div>
+          <section className="business-related"><h2>相关企业培训方向</h2>
+            <ul className="business-links">{topics.filter(topic=>topic.cases.includes(t)).map(topic=>
+              <li key={topic.id}><Link to={'/solutions/#'+topic.id}>{topic.name}</Link></li>)}</ul>
+          </section>
         </div>
       </section>
     </div>
