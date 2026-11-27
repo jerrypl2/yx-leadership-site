@@ -1,0 +1,22 @@
+name: Retry contact notifications
+on:
+  schedule:
+    - cron: '7,22,37,52 * * * *'
+  workflow_dispatch:
+permissions: {}
+concurrency:
+  group: contact-notification-retry
+  cancel-in-progress: false
+jobs:
+  retry:
+    if: vars.CONTACT_MAIL_ENABLED == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - name: Retry pending contact notifications
+        env:
+          RETRY_TOKEN: ${{ secrets.CONTACT_RETRY_TOKEN }}
+        run: |
+          curl --silent --show-error --fail-with-body --max-time 30 \
+            -X POST -H "Authorization: Bearer $RETRY_TOKEN" \
+            https://yueyue-leadership-api.hejun-alvin.chatgpt.site/api/contact/retry

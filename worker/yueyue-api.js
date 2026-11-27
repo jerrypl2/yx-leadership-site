@@ -1,4 +1,5 @@
 import { cards, answerQuestion } from '../src/yueyue/knowledge.js';
+import { createContactHandler } from './contact.js';
 
 const origins = new Set(['https://www.amachina-yuexin.com', 'https://amachina-yuexin.com', 'https://jerrypl2.github.io']);
 const project = 'proj_nCSWeSyDtq4wdq1cIa28tt5m';
@@ -9,6 +10,7 @@ const limitWindow = 60_000;
 // A short burst guard for each running instance. The OpenAI project spend limit
 // separately applies across all instances and both models.
 export function createHandler(upstream = fetch, clock = Date.now) {
+  const contact = createContactHandler(upstream, clock);
   const windows = new Map();
   function admit(ip, voice) {
     const window = Math.floor(clock() / limitWindow);
@@ -27,6 +29,9 @@ export function createHandler(upstream = fetch, clock = Date.now) {
 
   return async function handle(request, env) {
     const path = new URL(request.url).pathname;
+    if (path === '/api/contact' || path === '/api/contact/retry') {
+      return contact(request, env, () => admit('contact:' + (request.headers.get('CF-Connecting-IP') || 'unknown'), false));
+    }
     const voice = path === '/api/yueyue/voice';
     const origin = request.headers.get('Origin');
     const headers = { 'Cache-Control': 'no-store', 'Vary': 'Origin' };

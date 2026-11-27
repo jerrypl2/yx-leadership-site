@@ -5,8 +5,6 @@
 // a network failure leaves the static page in place. React replaces this node.
 document.querySelector('form')?.addEventListener('submit', event => {
   event.preventDefault();
-  alert('感谢您的留言！我们会尽快与您联系。');
-  event.currentTarget.reset();
 });
 
 if (location.protocol === 'file:') {

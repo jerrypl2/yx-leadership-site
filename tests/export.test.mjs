@@ -23,7 +23,7 @@ for (const mount of ['/', '/yx-leadership-site/']) {
       assert.ok(modulePath, `Missing client module on ${route}`);
       references.push(modulePath);
       for (const reference of references) {
-        if (reference.startsWith('data:')) continue;
+        if (reference.startsWith('data:') || reference === 'mailto:info@amachina.com') continue;
         const url = new URL(reference, pageUrl);
         assert.equal(url.origin, pageUrl.origin, `External runtime dependency: ${reference}`);
         assert.ok(url.pathname.startsWith(mount), `Escaped project path: ${route} → ${reference}`);

@@ -52,8 +52,8 @@ test('the static form prevents GET submission even when the HTTP client module n
     assert.equal(typeof submit, 'function');
     submit({ preventDefault: () => { prevented = true; }, currentTarget: form });
     assert.equal(prevented, true);
-    assert.equal(resets, 1);
-    assert.deepEqual(messages, ['感谢您的留言！我们会尽快与您联系。']);
+    assert.equal(resets, 0);
+    assert.deepEqual(messages, []);
     assert.equal(appended.length, protocol === 'file:' ? 0 : 1);
   }
 });

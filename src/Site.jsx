@@ -2,12 +2,11 @@
  * 悦心领导力中心 — independent, editable React source.
  * Reconstructed from the public application bundle on 2026-11-25.
  * Original text, responsive classes, icon paths and page composition are retained.
- * The contact form intentionally preserves the original alert/reset behavior;
- * it does not send an email. See the migration documentation before production use.
  */
-import { createElement, forwardRef, useState } from "react";
+import { createElement, forwardRef, useEffect, useRef, useState } from "react";
 import { useLocation } from "react-router-dom";
 import { Link, useParams, siteHref } from "./navigation.jsx";
+import { emptyContact, identifyAttempt, forgetAttempt, saveContact } from "./contact.js";
 import { asset } from "./assets.js";
 const logoSrc = asset(
   "https://botany-solid-84734790.figma.site/_components/v2/f51628a311779c982c4d8e2f61c4e7fbf4e590ff/image-1.428ac48c.png",
@@ -1678,27 +1677,45 @@ function CapabilityMapPage() {
   );
 }
 function ContactPage({ initialValues } = {}) {
-  const [formData, setFormData] = useState(() => initialValues ?? {
-    name: "",
-    email: "",
-    company: "",
-    phone: "",
-    wechat: "",
-    message: "",
-  });
-  const handleSubmit = (event) => {
+  const [formData, setFormData] = useState(() => initialValues ?? emptyContact);
+  const [ready, setReady] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const [status, setStatus] = useState("");
+  const [mailDraft, setMailDraft] = useState("");
+  const active = useRef(false);
+  const attempt = useRef(null);
+  useEffect(() => { setReady(true); }, []);
+  const handleSubmit = async (event) => {
     event.preventDefault();
-    alert("感谢您的留言！我们会尽快与您联系。");
-    setFormData({
-      name: "",
-      email: "",
-      company: "",
-      phone: "",
-      wechat: "",
-      message: "",
-    });
+    if (active.current || !ready) return;
+    active.current = true;
+    setBusy(true);
+    setStatus("正在保存留言…");
+    setMailDraft("");
+    try {
+      attempt.current = await identifyAttempt(formData, attempt.current);
+      const receipt = await saveContact(attempt.current.id, formData);
+      const accepted = receipt.notification === "accepted";
+      setStatus(`留言已保存，编号 ${receipt.id}。` + (accepted ? "通知已交给邮件服务。" : "负责人邮箱尚未确认收到通知。需要立即联系时，可点击下方链接发送邮件。"));
+      if (!accepted) {
+        const subject = encodeURIComponent("悦心官网留言 " + receipt.id);
+        const body = encodeURIComponent(`留言编号：${receipt.id}\n姓名：${formData.name}\n回复邮箱：${formData.email}\n\n${formData.message}`);
+        setMailDraft(`mailto:info@amachina.com?subject=${subject}&body=${body}`);
+      }
+      setFormData({...emptyContact});
+      attempt.current = null;
+      forgetAttempt();
+    } catch (error) {
+      const reason = error.message?.startsWith("请") || error.message?.startsWith("提交较频繁") ? error.message : "暂时无法确认保存结果，请保留此页面并重试。";
+      setStatus(reason);
+    } finally {
+      active.current = false;
+      setBusy(false);
+    }
   };
   const handleChange = (event) => {
+    setStatus("");
+    setMailDraft("");
     setFormData({
       ...formData,
       [event.target.name]: event.target.value,
@@ -1786,7 +1803,7 @@ function ContactPage({ initialValues } = {}) {
             </div>
             <div>
               <h2 className="text-3xl mb-8">{"在线留言"}</h2>
-              <form onSubmit={handleSubmit} className="space-y-6">
+              <form method="post" onSubmit={handleSubmit} className="space-y-6" aria-busy={busy}>
                 <div>
                   <label
                     htmlFor="name"
@@ -1798,6 +1815,8 @@ function ContactPage({ initialValues } = {}) {
                     type="text"
                     id="name"
                     name="name"
+                    maxLength={100}
+                    readOnly={busy}
                     required={!0}
                     value={formData.name}
                     onChange={handleChange}
@@ -1816,6 +1835,8 @@ function ContactPage({ initialValues } = {}) {
                     type="email"
                     id="email"
                     name="email"
+                    maxLength={254}
+                    readOnly={busy}
                     required={!0}
                     value={formData.email}
                     onChange={handleChange}
@@ -1834,6 +1855,8 @@ function ContactPage({ initialValues } = {}) {
                     type="text"
                     id="company"
                     name="company"
+                    maxLength={200}
+                    readOnly={busy}
                     value={formData.company}
                     onChange={handleChange}
                     className="w-full px-4 py-3 bg-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 text-base"
@@ -1851,6 +1874,8 @@ function ContactPage({ initialValues } = {}) {
                     type="tel"
                     id="phone"
                     name="phone"
+                    maxLength={48}
+                    readOnly={busy}
                     value={formData.phone}
                     onChange={handleChange}
                     className="w-full px-4 py-3 bg-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 text-base"
@@ -1868,6 +1893,8 @@ function ContactPage({ initialValues } = {}) {
                     type="text"
                     id="wechat"
                     name="wechat"
+                    maxLength={100}
+                    readOnly={busy}
                     value={formData.wechat}
                     onChange={handleChange}
                     className="w-full px-4 py-3 bg-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 text-base"
@@ -1884,6 +1911,8 @@ function ContactPage({ initialValues } = {}) {
                   <textarea
                     id="message"
                     name="message"
+                    maxLength={4000}
+                    readOnly={busy}
                     required={!0}
                     rows={6}
                     value={formData.message}
@@ -1894,11 +1923,15 @@ function ContactPage({ initialValues } = {}) {
                 </div>
                 <button
                   type="submit"
+                  disabled={!ready || busy}
                   className="w-full bg-primary text-primary-foreground px-8 py-4 rounded-lg hover:opacity-90 transition-opacity flex items-center justify-center gap-2 text-base"
                 >
                   <Send className="w-5 h-5" />
-                  {"发送留言"}
+                  {busy ? "正在提交…" : "发送留言"}
                 </button>
+                <p role="status" aria-live="polite" className="text-sm break-words">{status}</p>
+                {mailDraft && <a className="underline" href={mailDraft}>用自己的邮箱发送这条留言</a>}
+                <p className="text-sm">也可直接来信至 <a className="underline" href="mailto:info@amachina.com">info@amachina.com</a>。</p>
               </form>
             </div>
           </div>
