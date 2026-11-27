@@ -1,5 +1,5 @@
-import { useEffect, useState } from 'react';
-import { Routes, Route, useLocation } from 'react-router-dom';
+import { useEffect, useLayoutEffect, useState } from 'react';
+import { Routes, Route, useLocation, useNavigationType } from 'react-router-dom';
 import {
   Layout, HomePage, AboutPage, CapabilityMapPage, MethodsPage, ContactPage,
   CasesPage, CaseDetailPage, SolutionPage, IndustryPage, OpinionsPage,
@@ -10,7 +10,17 @@ import { CourseIndex, CourseDetail, BusinessIndex } from './business/BusinessPag
 import { Link } from './navigation.jsx';
 
 export function App({ initialContactValues } = {}) {
-  const {pathname, hash} = useLocation();
+  const {pathname, hash, key} = useLocation();
+  const navigation = useNavigationType();
+  useLayoutEffect(() => {
+    if (navigation !== 'POP' && /^\/contact\/?$/.test(pathname) && !hash) {
+      const scrollToTop = () => window.scrollTo({left: 0, top: 0, behavior: 'instant'});
+      scrollToTop();
+      // A smooth anchor scroll from the previous route can finish on the next frame.
+      const frame = requestAnimationFrame(scrollToTop);
+      return () => cancelAnimationFrame(frame);
+    }
+  }, [pathname, hash, key, navigation]);
   useEffect(() => {
     const title = businessPageTitle(pathname);
     document.title = title ? title+' · 悦心领导力中心' : 'YX Leadership Center';

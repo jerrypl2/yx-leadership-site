@@ -11,6 +11,16 @@ try {
     const context = await browser.newContext(options);
     const page = await context.newPage();
     await page.goto(base+'/classroom/');
+    const contactLink=page.locator('footer').getByRole('link',{name:'联系我们',exact:true});
+    for (let n=0;n<2;n++) {
+      await contactLink.scrollIntoViewIfNeeded();
+      assert.ok(await page.evaluate(()=>scrollY>500));
+      await contactLink.click();
+      await page.getByRole('heading',{name:'联系我们',exact:true}).waitFor();
+      await page.waitForFunction(()=>window.scrollY===0);
+      assert.ok(await page.locator('h1').evaluate(el=>el.getBoundingClientRect().bottom<=innerHeight));
+    }
+    await page.goto(base+'/classroom/');
     await page.getByRole('link',{name:'查看课程咨询目录',exact:true}).click();
     const search=page.getByRole('searchbox',{name:'查找课程'});
     for(const course of courses.filter(course=>course.alias)) {
@@ -34,6 +44,7 @@ try {
       const textarea=page.locator('textarea[name=message]');
       await page.waitForFunction(name=>document.querySelector('textarea[name=message]')?.value.includes(name),topic.name);
       assert.equal(await textarea.inputValue(),'我想咨询'+topic.name+'。');
+      await page.waitForFunction(()=>window.scrollY===0);
     }
     await page.goto(base+'/cases/2/');
     await page.getByRole('link',{name:'销售与渠道管理',exact:true}).click();

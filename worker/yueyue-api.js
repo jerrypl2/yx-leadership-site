@@ -30,8 +30,8 @@ export function createHandler(upstream = fetch, clock = Date.now) {
 
   return async function handle(request, env) {
     const path = new URL(request.url).pathname;
-    if (path === '/api/contact' || path === '/api/contact/retry' || path === inquiryPath) {
-      return contact(request, env, () => admit('contact:' + (request.headers.get('CF-Connecting-IP') || 'unknown'), false));
+    if (path === '/api/contact' || path.startsWith('/api/contact/') || path === inquiryPath) {
+      return contact(request, env, () => admit(path + ':' + (request.headers.get('CF-Connecting-IP') || 'unknown'), false));
     }
     const voice = path === '/api/yueyue/voice';
     const origin = request.headers.get('Origin');

@@ -6,7 +6,7 @@
 import { createElement, forwardRef, useEffect, useRef, useState } from "react";
 import { useLocation } from "react-router-dom";
 import { Link, useParams, siteHref } from "./navigation.jsx";
-import { emptyContact, identifyAttempt, forgetAttempt, saveContact } from "./contact.js";
+import { emptyContact, identifyAttempt, forgetAttempt, sendContact } from "./contact.js";
 import { topics } from "./business/topics.js";
 import { courses } from "./business/courses.js";
 import { CourseLinks } from "./business/BusinessPages.jsx";
@@ -1708,9 +1708,12 @@ function ContactPage({ initialValues } = {}) {
     setMailDraft("");
     try {
       attempt.current = await identifyAttempt(formData, attempt.current);
-      const receipt = await saveContact(attempt.current.id, formData);
+      const receipt = await sendContact(attempt.current.id, formData, () => setStatus("留言已保存，正在通知负责人…"));
       const accepted = receipt.notification === "accepted";
-      setStatus(`留言已保存，编号 ${receipt.id}。` + (accepted ? "通知已交给邮件服务。" : "负责人邮箱尚未确认收到通知。需要立即联系时，可点击下方链接发送邮件。"));
+      const notice = accepted ? "邮件服务已受理通知，负责人可直接回复您填写的邮箱。"
+        : receipt.notification === "pending" ? "负责人通知已排队，系统将重试。请保留编号，无需再次提交。"
+        : "邮件通知尚待核对。请保留编号，急需联系时可直接写信给负责人。";
+      setStatus(`留言已保存，编号 ${receipt.id}。` + notice);
       if (!accepted) {
         const subject = encodeURIComponent("悦心官网留言 " + receipt.id);
         const body = encodeURIComponent(`留言编号：${receipt.id}\n姓名：${formData.name}\n回复邮箱：${formData.email}\n\n${formData.message}`);

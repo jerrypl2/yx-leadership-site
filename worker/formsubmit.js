@@ -1,6 +1,5 @@
 import { sessionDates } from '../src/classroom/catalog.js';
-const formUrl = 'https://www.amachina-yuexin.com/contact/';
-const recipient = 'info@amachina.com';
+import {formSubmitUrl, formPage, notificationBody, readRelayResult} from '../src/contact-relay.js';
 const minute = 60000;
 
 async function updateState(db, id, state, nextAttempt = 0, diagnostic = null) {
@@ -36,33 +35,20 @@ export async function notify(db, row, send, now) {
     let upstreamStatus = 0;
     let failure = 'none';
     try {
-      const response = await send('https://formsubmit.co/ajax/' + recipient, {
+      const response = await send(formSubmitUrl, {
         method: 'POST', redirect: 'manual', signal: AbortSignal.timeout(8000),
-        headers: {'Content-Type':'application/json', Accept:'application/json', Referer:formUrl},
-        body: JSON.stringify({name, email, message:mailText, _replyto:email, _subject:subject, _url:formUrl}),
+        headers: {'Content-Type':'application/json', Accept:'application/json', Referer:formPage},
+        body: JSON.stringify(notificationBody({name, email, message:mailText}, subject)),
       });
       upstreamStatus = response.status;
-      failure = 'http';
-      if (response.status === 429) {
-        const seconds = Number(response.headers.get('Retry-After')) || 60;
-        nextAttempt = now + Math.max(minute, Math.min(86400000, seconds * 1000));
-        state = 'pending';
+      failure = response.ok ? 'unexpected_response' : 'http';
+      const result = await readRelayResult(response, now);
+      state = result.state;
+      if (state === 'pending') {
+        nextAttempt = now + result.delay;
         readyAt = nextAttempt;
-      } else if (response.ok) {
-        failure = 'unexpected_content';
-        const result = await response.json();
-        failure = 'declined';
-        if (/email address/i.test(result.message || '')) failure = 'invalid_address';
-        if (/spam|captcha/i.test(result.message || '')) failure = 'spam_filter';
-        if (/web server|URL/i.test(result.message || '')) failure = 'invalid_form_url';
-        if (result.success === true || result.success === 'true') {
-          state = 'sent';
-        } else if (/needs activation|activate (?:the |your )?form/i.test(result.message || '')) {
-          // FormSubmit retains the submitted message and releases it on activation.
-          // Leave further messages in D1 until the next probe to avoid reminder storms.
-          state = 'activation';
-          readyAt = now + 6 * 60 * minute;
-        }
+      } else if (state === 'activation') {
+        readyAt = now + 6 * 60 * minute;
       }
     } catch (error) {
       if (!upstreamStatus) failure = ['TypeError','TimeoutError','AbortError'].includes(error?.name) ? error.name : 'network';
@@ -79,8 +65,9 @@ export async function notify(db, row, send, now) {
 }
 
 export async function retryNotifications(db, send, now) {
-  await db.prepare("UPDATE contact_messages SET notification_state='review' WHERE notification_state='dispatching' AND next_attempt_at<=?").bind(now).run();
-  const {results} = await db.prepare("SELECT * FROM contact_messages WHERE notification_state='pending' AND next_attempt_at<=? ORDER BY created_at LIMIT 10").bind(now).all();
+  await db.prepare("UPDATE contact_messages SET notification_state='pending' WHERE notification_state='awaiting_browser' AND next_attempt_at<=?").bind(now).run();
+  await db.prepare("UPDATE contact_messages SET notification_state='review' WHERE notification_state IN ('dispatching','browser_dispatching') AND next_attempt_at<=?").bind(now).run();
+  const {results} = await db.prepare("SELECT * FROM contact_messages WHERE notification_state='pending' AND next_attempt_at<=? ORDER BY next_attempt_at, created_at LIMIT 10").bind(now).all();
   let accepted = 0;
   for (const row of results) {
     if (await notify(db, row, send, now) === 'accepted') accepted++;

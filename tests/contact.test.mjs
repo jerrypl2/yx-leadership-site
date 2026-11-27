@@ -3,6 +3,8 @@ import assert from 'node:assert/strict';
 import { DatabaseSync } from 'node:sqlite';
 import { readFileSync } from 'node:fs';
 import { createContactHandler } from '../worker/contact.js';
+import { contactEndpoint, sendContact } from '../src/contact.js';
+import { formSubmitUrl } from '../src/contact-relay.js';
 
 const sql = readFileSync(new URL('../drizzle/0000_contact_messages.sql', import.meta.url), 'utf8');
 const origin = 'https://www.amachina-yuexin.com';
@@ -24,6 +26,9 @@ function scenario(send) {
   const handler=createContactHandler(send,()=>now);
   return {
     db, env, advance: ms => { now+=ms; },
+    browser: (step, data) => handler(new Request(endpoint+'/'+step, {
+      method:'POST', headers:{Origin:origin,'Content-Type':'application/json'}, body:JSON.stringify(data),
+    }),env),
     submit: (data=fields, headers={Origin:origin,'Content-Type':'application/json'}) =>
       handler(new Request(endpoint,{method:'POST',headers,body:JSON.stringify(data)}),env),
     inquire: data => handler(new Request('https://backend.example/api/classroom/inquiries',{
@@ -106,6 +111,78 @@ test('invalid input, untrusted origins and failed storage cannot produce a succe
   assert.equal(s.db.prepare('SELECT count(*) AS n FROM contact_messages').get().n,0);
   delete s.env.DB;
   assert.equal((await s.submit()).status,503);
+});
+
+test('a saved browser submission can be claimed only once, even after a lost save response', async () => {
+  const s=scenario(()=>assert.fail('unexpected second delivery'));
+  const data={...fields, company:'仅存于本站',delivery:'browser'};
+  for (let n=0;n<2;n++) assert.equal((await (await s.submit(data)).json()).notification,'awaiting_browser');
+  assert.equal((await (await s.browser('dispatch',{...data,email:'other@example.invalid'})).json()).granted,false);
+  const claims=await Promise.all([s.browser('dispatch',data),s.browser('dispatch',data)]);
+  const replies=await Promise.all(claims.map(r=>r.json()));
+  assert.equal(replies.filter(r=>r.granted).length,1);
+  const {ticket,body}=replies.find(r=>r.granted);
+  assert.deepEqual(body,{name:data.name,email:data.email,message:data.message,_replyto:data.email,
+    _url:'https://www.amachina-yuexin.com/contact/',_subject:'悦心官网留言 '+data.id});
+  const result={id:data.id,ticket,state:'sent'};
+  assert.equal((await s.browser('receipt',{...result,ticket:crypto.randomUUID()})).status,409);
+  for (let n=0;n<2;n++) assert.equal((await s.browser('receipt',result)).status,200);
+  assert.equal((await (await s.submit(data)).json()).notification,'accepted');
+  s.advance(180000);
+  assert.deepEqual(await (await s.retry()).json(),{checked:0,accepted:0});
+  assert.equal(s.db.prepare('SELECT attempts FROM contact_messages').get().attempts,1);
+});
+
+test('unclaimed messages fall back to the queue while an uncertain browser delivery is held for review', async () => {
+  let calls=0;
+  const s=scenario(()=>{calls++;return Response.json({success:true});});
+  const data={...fields,delivery:'browser'};
+  await s.submit(data);
+  const abandoned={...data,id:crypto.randomUUID()};
+  await s.submit(abandoned);
+  await s.browser('dispatch',data);
+  s.advance(180000);
+  assert.deepEqual(await (await s.retry()).json(),{checked:1,accepted:1});
+  assert.equal((await (await s.submit(data)).json()).notification,'review');
+  assert.equal((await (await s.browser('dispatch',abandoned)).json()).granted,false);
+  assert.equal(calls,1);
+});
+
+test('a browser rate-limit receipt defers the server retry until the specified time', async () => {
+  const s=scenario(()=>Response.json({success:true}));
+  const data={...fields,delivery:'browser'};
+  await s.submit(data);
+  const {ticket}=await (await s.browser('dispatch',data)).json();
+  const result={id:data.id,ticket,state:'pending',delay:300000};
+  assert.equal((await s.browser('receipt',result)).status,200);
+  assert.equal((await (await s.submit(data)).json()).notification,'pending');
+  s.advance(299999);
+  assert.equal((await (await s.retry()).json()).checked,0);
+  s.advance(1);
+  assert.equal((await (await s.retry()).json()).accepted,1);
+});
+
+test('a lost database acknowledgement is retried without issuing another browser email', async t => {
+  const s=scenario(()=>assert.fail('unexpected server delivery'));
+  const {id,...visitor}=fields;
+  let emails=0, receipts=0;
+  t.mock.method(globalThis,'fetch',async (url, options)=>{
+    const data=JSON.parse(options.body);
+    if (url===contactEndpoint) return s.submit(data);
+    if (url===contactEndpoint+'/dispatch') return s.browser('dispatch',data);
+    if (url===formSubmitUrl) {
+      emails++;
+      return Response.json({success:'true'});
+    }
+    assert.equal(url,contactEndpoint+'/receipt');
+    const response=await s.browser('receipt',data);
+    if (++receipts===1) throw new TypeError('response lost');
+    return response;
+  });
+  assert.equal((await sendContact(id,visitor,()=>{})).notification,'accepted');
+  assert.equal(emails,1);
+  assert.equal(receipts,2);
+  assert.equal(s.db.prepare('SELECT notification_state FROM contact_messages').get().notification_state,'sent');
 });
 
 test('class inquiries use the canonical session, emit a matching receipt and retain one durable row', async () => {
