@@ -1803,6 +1803,7 @@ function ContactPage({ initialValues } = {}) {
             </div>
             <div>
               <h2 className="text-3xl mb-8">{"在线留言"}</h2>
+              <p className="mb-6 text-sm">留言由悦心保存并用于回复。FormSubmit 会向负责人转发姓名、邮箱和留言，并保留转发记录 30 天。</p>
               <form method="post" onSubmit={handleSubmit} className="space-y-6" aria-busy={busy}>
                 <div>
                   <label

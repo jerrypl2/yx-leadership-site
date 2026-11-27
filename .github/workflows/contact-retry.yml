@@ -17,6 +17,6 @@ jobs:
         env:
           RETRY_TOKEN: ${{ secrets.CONTACT_RETRY_TOKEN }}
         run: |
-          curl --silent --show-error --fail-with-body --max-time 30 \
+          curl --silent --show-error --fail-with-body --max-time 100 \
             -X POST -H "Authorization: Bearer $RETRY_TOKEN" \
             https://yueyue-leadership-api.hejun-alvin.chatgpt.site/api/contact/retry

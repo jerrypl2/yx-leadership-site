@@ -8,9 +8,10 @@ const sql = readFileSync(new URL('../drizzle/0000_contact_messages.sql', import.
 const origin = 'https://www.amachina-yuexin.com';
 const endpoint = 'https://backend.example/api/contact';
 const fields = {id:crypto.randomUUID(),name:'测试',email:'visitor@example.invalid',message:'仅供测试'};
-function scenario(send, mail = true) {
+function scenario(send) {
   const db = new DatabaseSync(':memory:');
   db.exec(sql);
+  db.exec(readFileSync(new URL('../drizzle/0001_formsubmit_gate.sql', import.meta.url), 'utf8'));
   let now = 100000;
   const env = {DB:{prepare: query => ({bind(...args) {
     const statement = db.prepare(query);
@@ -20,7 +21,6 @@ function scenario(send, mail = true) {
       all: async () => ({results:statement.all(...args)}),
     };
   }})}, CONTACT_RETRY_TOKEN:'test-token'};
-  if (mail) Object.assign(env,{CONTACT_FROM:'website@example.invalid',RESEND_API_KEY:'test-only'});
   const handler=createContactHandler(send,()=>now);
   return {
     db, env, advance: ms => { now+=ms; },
@@ -34,53 +34,61 @@ test('a committed submission survives a lost response, double click and concurre
   const calls=[];
   const s = scenario(async (url, options) => {
     calls.push({url, ...options});
-    return Response.json({id:'provider-receipt'});
+    return Response.json({success:'true'});
   });
   const receipts=await Promise.all([s.submit(),s.submit(),s.submit()]);
   for (const r of receipts) assert.equal((await r.json()).id,fields.id);
   assert.equal((await (await s.submit()).json()).notification,'accepted');
   assert.equal(s.db.prepare('SELECT count(*) AS n FROM contact_messages').get().n,1);
   assert.equal(calls.length,1);
-  assert.equal(calls[0].headers['Idempotency-Key'],'contact/'+fields.id);
+  assert.equal(calls[0].redirect,'manual');
+  assert.equal(calls[0].url,'https://formsubmit.co/ajax/info@amachina.com');
   const notification=JSON.parse(calls[0].body);
-  assert.deepEqual(notification.to,['info@amachina.com']);
-  assert.equal(notification.reply_to,fields.email);
-  assert.ok(notification.text.includes(fields.message));
+  assert.equal(notification._replyto,fields.email);
+  assert.equal(notification.message,fields.message);
+  assert.ok(notification._subject.includes(fields.id));
+  assert.deepEqual(Object.keys(notification).sort(), ['name','email','message','_replyto','_subject','_url'].sort());
   assert.equal((await s.submit({...fields,message:'另一次编辑'})).status,409);
 });
 
-test('failed delivery stays durable and the protected retry recovers with the same provider key', async () => {
-  const keys=[];
-  const s=scenario(async (_url,options)=>{
-    keys.push(options.headers['Idempotency-Key']);
-    return keys.length===1 ? new Response(null,{status:503}) : Response.json({id:'retry-receipt'});
+test('a definite rate-limit rejection is retried from the durable outbox', async () => {
+  let calls=0;
+  const s=scenario(async ()=>{
+    calls++;
+    return calls===1 ? new Response(null,{status:429}) : Response.json({success:true});
   });
   assert.equal((await (await s.submit()).json()).notification,'pending');
   assert.equal((await s.retry('incorrect')).status,403);
   assert.deepEqual(await (await s.retry()).json(),{checked:0,accepted:0});
   s.advance(61000);
   assert.deepEqual(await (await s.retry()).json(),{checked:1,accepted:1});
-  assert.deepEqual(keys,[keys[0],keys[0]]);
-  assert.equal(s.db.prepare('SELECT provider_id FROM contact_messages').get().provider_id,'retry-receipt');
+  assert.equal(calls,2);
 });
 
-test('an unconfigured sender records a pending message for delivery after configuration', async () => {
-  let count=0;
-  const s=scenario(async ()=>{count++; return Response.json({id:'later'});},false);
-  const r=await s.submit();
-  assert.deepEqual(await r.json(),{saved:true,notification:'pending',id:fields.id});
-  assert.equal(count,0);
-  assert.equal((await s.retry()).status,503);
-  s.advance(48*3600000);
-  Object.assign(s.env,{CONTACT_FROM:'site@example.invalid',RESEND_API_KEY:'fixture'});
+test('activation holds subsequent entries locally and releases the queue on the next active probe', async () => {
+  let calls=0;
+  const s=scenario(async ()=>{
+    calls++;
+    return calls===1 ? Response.json({success:'false',message:'This form needs Activation.'}) : Response.json({success:'true'});
+  });
+  assert.equal((await (await s.submit()).json()).notification,'activation');
+  const later={...fields,id:crypto.randomUUID()};
+  assert.equal((await (await s.submit(later)).json()).notification,'pending');
+  await s.retry();
+  assert.equal(calls,1);
+  s.advance(6*3600000+1);
   assert.deepEqual(await (await s.retry()).json(),{checked:1,accepted:1});
+  assert.equal((await (await s.submit(later)).json()).notification,'accepted');
+  assert.equal(calls,2);
 });
 
-test('uncertain delivery beyond the provider dedupe window is held for review', async () => {
+test('a lost provider acknowledgement or a crashed in-flight attempt is held for reconciliation', async () => {
   let calls=0;
   const s=scenario(async ()=>{calls++; throw new Error('lost receipt');});
-  await s.submit();
-  s.advance(24*3600000);
+  assert.equal((await (await s.submit()).json()).notification,'review');
+  await s.retry();
+  assert.equal(calls,1);
+  s.db.prepare("UPDATE contact_messages SET notification_state='dispatching', next_attempt_at=0").run();
   await s.retry();
   assert.equal(calls,1);
   assert.equal(s.db.prepare('SELECT notification_state FROM contact_messages').get().notification_state,'review');
