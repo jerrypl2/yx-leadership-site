@@ -19,60 +19,19 @@ const logoSrc = asset(
 function Header() {
   return (
     <header className="fixed top-0 left-0 right-0 bg-background/95 backdrop-blur-sm border-b border-border z-50">
-      <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
-        <Link to="/" className="flex items-center gap-3">
+      <div className="site-header-inner max-w-7xl mx-auto flex items-center justify-between">
+        <Link to="/">
           <img src={logoSrc} alt="悦心领导力中心" className="h-8" />
         </Link>
-        <Link to="/classroom/" className="classroom-mobile-link text-sm hover:underline">悦心教室</Link>
-        <nav className="hidden md:flex items-center gap-6">
-          <a
-            href={siteHref("/#solutions")}
-            className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-          >
-            {"解决方案"}
-          </a>
-          <span className="text-muted-foreground">{"｜"}</span>
-          <Link
-            to="/capability-map"
-            className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-          >
-            {"组织能力地图"}
-          </Link>
-          <span className="text-muted-foreground">{"｜"}</span>
-          <Link
-            to="/methods"
-            className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-          >
-            {"方法与实现"}
-          </Link>
-          <span className="text-muted-foreground">{"｜"}</span>
-          <Link
-            to="/cases"
-            className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-          >
-            {"案例"}
-          </Link>
-          <span className="text-muted-foreground">{"｜"}</span>
-          <Link
-            to="/opinions"
-            className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-          >
-            {"观点"}
-          </Link>
-          <span className="text-muted-foreground">{"｜"}</span>
-          <Link
-            to="/classroom"
-            className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-          >
-            {"悦心教室"}
-          </Link>
-          <span className="text-muted-foreground">{"｜"}</span>
-          <Link
-            to="/about"
-            className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-          >
-            {"关于我们"}
-          </Link>
+        <nav className="site-navigation text-sm" aria-label="主导航">
+          <a href={siteHref("/#solutions")}>解决方案</a>
+          <Link to="/capability-map">组织能力地图</Link>
+          <Link className="mobile-shortcut" to={leadershipModelPath}>领导力模型</Link>
+          <Link to="/methods">方法与实现</Link>
+          <Link to="/cases">案例</Link>
+          <Link to="/opinions">观点</Link>
+          <Link className="mobile-shortcut" to="/classroom/">悦心教室</Link>
+          <Link to="/about">关于我们</Link>
         </nav>
       </div>
     </header>

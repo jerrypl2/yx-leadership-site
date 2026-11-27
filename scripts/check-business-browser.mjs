@@ -8,10 +8,48 @@ import { leadershipDimensions, leadershipModelPath } from '../src/business/leade
 const base = process.argv.includes('--live') ? 'https://www.amachina-yuexin.com' : 'http://127.0.0.1:4183';
 const browser = await chromium.launch();
 try {
+  const layout = await browser.newPage();
+  await layout.goto(base+'/');
+  for (const width of [320,390,767,768,820,1024,1440]) {
+    await layout.setViewportSize({width,height:800});
+    const header = layout.getByRole('banner');
+    const nav = header.getByRole('navigation',{name:'主导航'});
+    const expected = width < 768 ? ['领导力模型','悦心教室']
+      : ['解决方案','组织能力地图','领导力模型','方法与实现','案例','观点','悦心教室','关于我们'];
+    assert.deepEqual(await nav.getByRole('link').allTextContents(),expected);
+    const visible = await header.getByRole('link').all();
+    let previousRight=0;
+    for (const link of visible) {
+      const box=await link.boundingBox();
+      assert.ok(box && box.x>=previousRight-1 && box.x+box.width<=width+1, 'Header links must fit at '+width);
+      previousRight=box.x+box.width;
+    }
+  }
+  await layout.setViewportSize({width:320,height:568});
+  await layout.goto(base+'/classroom/');
+  const choices = layout.getByRole('navigation',{name:'悦心教室选课方式'});
+  const directoryBox=await choices.getByRole('link',{name:'查看课程咨询目录'}).boundingBox();
+  const modelBox=await choices.getByRole('link',{name:'按领导力模型选课'}).boundingBox();
+  assert.ok(directoryBox && modelBox && Math.abs(directoryBox.y-modelBox.y)<1 &&
+    modelBox.x>=directoryBox.x+directoryBox.width-1 && modelBox.x+modelBox.width<=320 && modelBox.y+modelBox.height<568);
+  await layout.close();
   for (const [device, options] of [['desktop',{viewport:{width:1440,height:900}}],['mobile',devices['iPhone 13']]]) {
     const context = await browser.newContext(options);
     const page = await context.newPage();
-    await page.goto(base+'/classroom/');
+    await page.goto(base+'/');
+    const mainNav=page.getByRole('navigation',{name:'主导航'});
+    await mainNav.getByRole('link',{name:'领导力模型',exact:true}).click();
+    await page.getByRole('heading',{name:'领导力模型',exact:true}).waitFor();
+    assert.equal(new URL(page.url()).pathname,leadershipModelPath);
+    await page.locator('footer').scrollIntoViewIfNeeded();
+    await mainNav.getByRole('link',{name:'悦心教室',exact:true}).click();
+    const classroomNav=page.getByRole('navigation',{name:'悦心教室选课方式'});
+    await classroomNav.waitFor();
+    await page.waitForFunction(()=>window.scrollY===0);
+    await classroomNav.getByRole('link',{name:'按领导力模型选课',exact:true}).click();
+    await page.getByRole('heading',{name:'领导力模型',exact:true}).waitFor();
+    assert.equal(new URL(page.url()).pathname,leadershipModelPath);
+    await mainNav.getByRole('link',{name:'悦心教室',exact:true}).click();
     const contactLink=page.locator('footer').getByRole('link',{name:'联系我们',exact:true});
     for (let n=0;n<2;n++) {
       await contactLink.scrollIntoViewIfNeeded();

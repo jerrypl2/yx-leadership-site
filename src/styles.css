@@ -1255,12 +1255,23 @@
   20%, 50% { opacity: 0; }
 }
 
+.site-header-inner { gap: .75rem; padding: .625rem clamp(.75rem, 2vw, 1.5rem); }
+.site-navigation { display: flex; align-items: center; gap: .9rem; white-space: nowrap; }
+.site-navigation a { display: none; align-items: center; min-height: 2.75rem; }
+.site-navigation .mobile-shortcut { display: inline-flex; }
+.site-navigation a:hover, .site-navigation a:focus-visible { text-decoration: underline; text-underline-offset: .25em; }
+@media (min-width: 48rem) {
+  .site-navigation { gap: 0; color: var(--muted-foreground); }
+  .site-navigation a { display: inline-flex; }
+  .site-navigation a + a::before { content: ''; height: .9em; width: 1px; background: var(--border); margin-inline: clamp(.45rem, 1.1vw, 1.25rem); }
+}
+
 /* Classroom schedule and its inline inquiry form. */
-@media (min-width: 48rem) { .classroom-mobile-link { display: none; } }
 .classroom-page { max-width: 72rem; margin: 0 auto; padding: 7.5rem 1.5rem 5rem; color: var(--foreground); }
 .classroom-heading { padding-bottom: 3rem; }
 .classroom-heading h1 { font-size: clamp(2.25rem, 5vw, 3rem); line-height: 1.15; margin: 0 0 1rem; }
 .classroom-heading p { color: var(--muted-foreground); font-size: 1.2rem; }
+.classroom-heading .course-paths { margin: 1rem 0 0; }
 .classroom-toolbar { display: flex; justify-content: space-between; align-items: end; gap: 1.5rem; margin-bottom: 1.25rem; }
 .classroom-toolbar h2 { font-size: 1.6rem; margin-bottom: .4rem; }
 .classroom-toolbar p, .classroom-row p, .classroom-inquiry p, .classroom-help { color: var(--muted-foreground); line-height: 1.65; }
@@ -1338,6 +1349,10 @@
 .course-paths { display: flex; flex-wrap: wrap; gap: .6rem; margin-bottom: 1.25rem; }
 .course-paths a { padding: .65rem 1rem; border: 1px solid var(--border); border-radius: .45rem; }
 .course-paths a:hover, .model-overview a:hover { background: var(--muted); }
+@media (max-width: 24rem) {
+  .classroom-heading .course-paths { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .classroom-heading .course-paths a { padding-inline: .25rem; text-align: center; }
+}
 #course-search, .model-dimension { scroll-margin-top: 6rem; }
 .model-overview { display: grid; grid-template-columns: repeat(4, 1fr); gap: .8rem; }
 .model-overview a { display: grid; align-content: start; gap: .45rem; padding: 1.05rem; border: 1px solid var(--border); border-radius: .6rem; }

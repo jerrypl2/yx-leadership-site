@@ -9,7 +9,7 @@ export function nextVersion(html) {
 }
 
 export function buildVersion() {
-  const value = process.env.SITE_VERSION || '0.5';
+  const value = process.env.SITE_VERSION || '0.6';
   if (!/^\d+\.\d+$/.test(value)) throw new Error('Invalid SITE_VERSION');
   return JSON.stringify(value);
 }

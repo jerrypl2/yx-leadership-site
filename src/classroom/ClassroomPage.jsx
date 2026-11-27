@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { Link } from '../navigation.jsx';
+import { leadershipModelPath } from '../business/leadership-model.js';
 import { contactEndpoint, forgetAttempt, identifyAttempt, saveContact } from '../contact.js';
 import { inquiryPath, sessions, sessionDates } from './catalog.js';
 
@@ -80,7 +81,10 @@ export function ClassroomPage() {
     <header className="classroom-heading">
       <h1>悦心教室</h1>
       <p>查看近期公开课，向教务咨询适合你的班次。</p>
-      <Link className="business-back" to="/courses/">查看课程咨询目录</Link>
+      <nav className="course-paths" aria-label="悦心教室选课方式">
+        <Link to="/courses/">查看课程咨询目录</Link>
+        <Link to={leadershipModelPath}>按领导力模型选课</Link>
+      </nav>
     </header>
     <section aria-labelledby="schedule-title">
       <div className="classroom-toolbar"><div><h2 id="schedule-title">2026 年 12 月公开课</h2>
