@@ -1,4 +1,5 @@
 import { cards, answerQuestion } from '../src/yueyue/knowledge.js';
+import { inquiryPath } from '../src/classroom/catalog.js';
 import { createContactHandler } from './contact.js';
 
 const origins = new Set(['https://www.amachina-yuexin.com', 'https://amachina-yuexin.com', 'https://jerrypl2.github.io']);
@@ -29,7 +30,7 @@ export function createHandler(upstream = fetch, clock = Date.now) {
 
   return async function handle(request, env) {
     const path = new URL(request.url).pathname;
-    if (path === '/api/contact' || path === '/api/contact/retry') {
+    if (path === '/api/contact' || path === '/api/contact/retry' || path === inquiryPath) {
       return contact(request, env, () => admit('contact:' + (request.headers.get('CF-Connecting-IP') || 'unknown'), false));
     }
     const voice = path === '/api/yueyue/voice';

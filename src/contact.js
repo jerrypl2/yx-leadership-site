@@ -4,24 +4,24 @@ const storageKey = 'yx-contact-attempt-v1';
 
 // A tab may lose the response after the server commits. Keep only a digest and
 // an opaque request ID so a re-entered, identical draft can reuse its receipt.
-export async function identifyAttempt(fields, previous) {
+export async function identifyAttempt(fields, previous, key = storageKey) {
   const bytes = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(JSON.stringify(fields)));
   const digest = Array.from(new Uint8Array(bytes), byte => byte.toString(16).padStart(2, '0')).join('');
   let attempt = previous;
   if (!attempt) {
-    try { attempt = JSON.parse(sessionStorage.getItem(storageKey)); } catch { /* Private browsing. */ }
+    try { attempt = JSON.parse(sessionStorage.getItem(key)); } catch { /* Private browsing. */ }
   }
   if (attempt?.digest !== digest || !attempt.id) attempt = {digest, id: crypto.randomUUID()};
-  try { sessionStorage.setItem(storageKey, JSON.stringify(attempt)); } catch { /* In-memory retry still works. */ }
+  try { sessionStorage.setItem(key, JSON.stringify(attempt)); } catch { /* In-memory retry still works. */ }
   return attempt;
 }
 
-export function forgetAttempt() {
-  try { sessionStorage.removeItem(storageKey); } catch { /* No persistent draft. */ }
+export function forgetAttempt(key = storageKey) {
+  try { sessionStorage.removeItem(key); } catch { /* No persistent draft. */ }
 }
 
-export async function saveContact(id, fields) {
-  const response = await fetch(contactEndpoint, {
+export async function saveContact(id, fields, endpoint = contactEndpoint) {
+  const response = await fetch(endpoint, {
     method: 'POST',
     headers: {'Content-Type': 'application/json'},
     credentials: 'omit',

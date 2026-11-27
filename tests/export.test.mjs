@@ -1,3 +1,4 @@
+import { nextVersion, buildVersion } from '../scripts/site-version.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFile, stat } from 'node:fs/promises';
@@ -79,4 +80,14 @@ test('all 14 original image files are bundled', async () => {
   const files = [...new Set(Object.values(manifest))];
   assert.equal(files.length, 14);
   for (const file of files) assert.ok((await stat(join(output, 'media', file))).size > 100);
+});
+
+test('homepage version survives static export and increments as an integer on the next release', async () => {
+  const homepage = await readFile(join(output, 'index.html'),'utf8');
+  const current=JSON.parse(buildVersion());
+  const [major, minor]=current.split('.');
+  assert.ok(homepage.includes('Version '+current+'</p>'));
+  assert.equal(nextVersion(homepage),major+'.'+(Number(minor)+1));
+  assert.equal(nextVersion('<p>测试版本 · Version 0.9</p>'),'0.10');
+  assert.throws(()=>nextVersion('<h1>Unavailable</h1>'));
 });

@@ -1,3 +1,4 @@
+import { sessionDates } from '../src/classroom/catalog.js';
 const formUrl = 'https://www.amachina-yuexin.com/contact/';
 const recipient = 'info@amachina.com';
 const minute = 60000;
@@ -24,7 +25,12 @@ export async function notify(db, row, send, now) {
       WHERE id=? AND notification_state='pending' AND next_attempt_at<=?`).bind(now, lease, row.id, now).run();
     if (!claimed.meta.changes) return 'pending';
 
-    const {name, email, message} = JSON.parse(row.payload);
+    const {name, email, message, session, kind} = JSON.parse(row.payload);
+    const classroom = kind === 'classroom_inquiry' && session;
+    const subject = (classroom ? '悦心教室班次咨询 ' : '悦心官网留言 ') + row.id;
+    const mailText = classroom
+      ? [session.title, '班次 ' + session.id + ' · ' + session.city, '参考日期 ' + sessionDates(session), '', message].join('\n')
+      : message;
     let state = 'review';
     let nextAttempt = 0;
     let upstreamStatus = 0;
@@ -33,7 +39,7 @@ export async function notify(db, row, send, now) {
       const response = await send('https://formsubmit.co/ajax/' + recipient, {
         method: 'POST', redirect: 'manual', signal: AbortSignal.timeout(8000),
         headers: {'Content-Type':'application/json', Accept:'application/json', Referer:formUrl},
-        body: JSON.stringify({name, email, message, _replyto:email, _subject:'悦心官网留言 '+row.id, _url:formUrl}),
+        body: JSON.stringify({name, email, message:mailText, _replyto:email, _subject:subject, _url:formUrl}),
       });
       upstreamStatus = response.status;
       failure = 'http';

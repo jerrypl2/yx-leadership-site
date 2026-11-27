@@ -26,6 +26,9 @@ function scenario(send) {
     db, env, advance: ms => { now+=ms; },
     submit: (data=fields, headers={Origin:origin,'Content-Type':'application/json'}) =>
       handler(new Request(endpoint,{method:'POST',headers,body:JSON.stringify(data)}),env),
+    inquire: data => handler(new Request('https://backend.example/api/classroom/inquiries',{
+      method:'POST', headers:{Origin:origin,'Content-Type':'application/json'},body:JSON.stringify(data)
+    }),env),
     retry: (key='test-token') => handler(new Request(endpoint+'/retry',{method:'POST',headers:{Authorization:'Bearer '+key}}),env),
   };
 }
@@ -103,4 +106,27 @@ test('invalid input, untrusted origins and failed storage cannot produce a succe
   assert.equal(s.db.prepare('SELECT count(*) AS n FROM contact_messages').get().n,0);
   delete s.env.DB;
   assert.equal((await s.submit()).status,503);
+});
+
+test('class inquiries use the canonical session, emit a matching receipt and retain one durable row', async () => {
+  const messages=[];
+  const s=scenario(async (_url, options) => {
+    messages.push(JSON.parse(options.body));
+    return Response.json({success:true});
+  });
+  const data={...fields, sessionId:'8161', city:'篡改', kind:'registration', message:''};
+  assert.equal((await s.inquire({...data,sessionId:'999999'})).status,400);
+  const responses=await Promise.all([s.inquire(data),s.inquire(data)]);
+  for (const r of responses) {
+    const receipt=await r.json();
+    assert.equal(receipt.kind,'classroom_inquiry');
+    assert.equal(receipt.session.city,'深圳');
+    assert.equal(receipt.session.start,'2026-12-03');
+    assert.equal(receipt.id,data.id);
+  }
+  assert.equal(s.db.prepare('SELECT count(*) AS n FROM contact_messages').get().n,1);
+  assert.equal(messages.length,1);
+  assert.match(messages[0].message,/8161 · 深圳/);
+  assert.equal(messages[0]._subject,'悦心教室班次咨询 '+data.id);
+  assert.equal((await s.inquire({...data,sessionId:'8226'})).status,409);
 });

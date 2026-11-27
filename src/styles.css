@@ -1254,3 +1254,44 @@
   0%, 70%, 100% { opacity: 1; }
   20%, 50% { opacity: 0; }
 }
+
+/* Classroom schedule and its inline inquiry form. */
+@media (min-width: 48rem) { .classroom-mobile-link { display: none; } }
+.classroom-page { max-width: 72rem; margin: 0 auto; padding: 7.5rem 1.5rem 5rem; color: var(--foreground); }
+.classroom-heading { padding-bottom: 3rem; }
+.classroom-heading h1 { font-size: clamp(2.25rem, 5vw, 3rem); line-height: 1.15; margin: 0 0 1rem; }
+.classroom-heading p { color: var(--muted-foreground); font-size: 1.2rem; }
+.classroom-toolbar { display: flex; justify-content: space-between; align-items: end; gap: 1.5rem; margin-bottom: 1.25rem; }
+.classroom-toolbar h2 { font-size: 1.6rem; margin-bottom: .4rem; }
+.classroom-toolbar p, .classroom-row p, .classroom-inquiry p, .classroom-help { color: var(--muted-foreground); line-height: 1.65; }
+.classroom-city { display: grid; gap: .3rem; min-width: 8rem; font-size: .9rem; }
+.classroom-toolbar select, .classroom-inquiry input, .classroom-inquiry textarea { border: 1px solid var(--border); border-radius: .45rem; padding: .6rem .8rem; background: var(--background); font: inherit; width: 100%; }
+.classroom-list { border-top: 1px solid var(--border); }
+.classroom-list li { border-bottom: 1px solid var(--border); scroll-margin-top: 5rem; }
+.classroom-row { display: grid; grid-template-columns: 8.2rem 1fr auto; align-items: center; gap: 1.25rem; padding: 1.4rem 0; }
+.classroom-date { font-weight: 600; font-variant-numeric: tabular-nums; }
+.classroom-date small { display: block; font-size: .9rem; color: var(--muted-foreground); margin-top: .2rem; font-weight: normal; }
+.classroom-row h3, .classroom-inquiry h3 { font-size: 1.14rem; font-weight: 600; }
+.classroom-row p { font-size: .9rem; margin-top: .15rem; }
+.classroom-action { display: inline-block; padding: .6rem .95rem; border: 1px solid var(--border); border-radius: .45rem; text-align: center; }
+.classroom-action:hover, .classroom-action[aria-expanded=true] { background: var(--muted); }
+.classroom-inquiry { margin: 0 0 1.4rem; padding: 1.4rem; background: var(--muted); border-radius: .65rem; }
+.classroom-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+.classroom-inquiry label { display: grid; gap: .35rem; margin: .8rem 0; font-size: 1rem; }
+.classroom-inquiry p { overflow-wrap: anywhere; margin: .35rem 0; }
+.classroom-inquiry fieldset p { font-size: .9rem; }
+.classroom-inquiry a, .classroom-help a { text-decoration: underline; }
+.classroom-submit { background: var(--primary); color: var(--primary-foreground); padding: .7rem 1.2rem; border-radius: .45rem; margin-top: .7rem; cursor: pointer; }
+.classroom-inquiry fieldset:disabled { opacity: .7; }
+.classroom-help { margin-top: 1.5rem; }
+@media (max-width: 640px) {
+  .classroom-page { padding: 6rem 1rem 3rem; }
+  .classroom-heading { padding-bottom: 2rem; }
+  .classroom-toolbar { display: grid; gap: .75rem; }
+  .classroom-city { grid-template-columns: auto 1fr; align-items: center; width: fit-content; gap: .75rem; }
+  .classroom-row { grid-template-columns: minmax(0, 1fr) auto; gap: .45rem .75rem; }
+  .classroom-date { grid-column: 1/-1; font-size: .95rem; }
+  .classroom-date small { display: inline; margin-left: .6rem; }
+  .classroom-fields { grid-template-columns: 1fr; gap: 0; }
+  .classroom-inquiry { padding: 1rem; }
+}

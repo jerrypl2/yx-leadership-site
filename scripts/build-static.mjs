@@ -1,3 +1,4 @@
+import { buildVersion } from './site-version.mjs';
 import { build } from 'esbuild';
 import { readFile, writeFile, mkdir, cp } from 'node:fs/promises';
 import { resolve, dirname, join } from 'node:path';
@@ -13,6 +14,7 @@ await mkdir(dirname(renderer), { recursive: true });
 await build({
   entryPoints: [join(root, 'src/entry-server.jsx')],
   outfile: renderer, bundle: true, platform: 'node', format: 'esm',
+  define: {__SITE_VERSION__: buildVersion()},
   packages: 'external', jsx: 'automatic', logLevel: 'warning',
 });
 const { renderRoute } = await import(pathToFileURL(renderer));

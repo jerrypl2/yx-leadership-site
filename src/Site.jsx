@@ -7,6 +7,7 @@ import { createElement, forwardRef, useEffect, useRef, useState } from "react";
 import { useLocation } from "react-router-dom";
 import { Link, useParams, siteHref } from "./navigation.jsx";
 import { emptyContact, identifyAttempt, forgetAttempt, saveContact } from "./contact.js";
+import { ClassroomPage } from "./classroom/ClassroomPage.jsx";
 import { asset } from "./assets.js";
 const logoSrc = asset(
   "https://botany-solid-84734790.figma.site/_components/v2/f51628a311779c982c4d8e2f61c4e7fbf4e590ff/image-1.428ac48c.png",
@@ -18,6 +19,7 @@ function Header() {
         <Link to="/" className="flex items-center gap-3">
           <img src={logoSrc} alt="悦心领导力中心" className="h-8" />
         </Link>
+        <Link to="/classroom/" className="classroom-mobile-link text-sm hover:underline">悦心教室</Link>
         <nav className="hidden md:flex items-center gap-6">
           <a
             href={siteHref("/#solutions")}
@@ -129,6 +131,7 @@ function Footer() {
                   {"观点"}
                 </Link>
               </li>
+              <li><Link to="/classroom/" className="hover:text-foreground transition-colors">悦心教室</Link></li>
               <li>
                 <Link
                   to="/about"
@@ -151,7 +154,7 @@ function Footer() {
         <div className="pt-8 border-t border-border text-sm text-muted-foreground text-center">
           {"© 2026 上海美鼎企业管理咨询有限公司。保留所有权利。"}
           {pathname === "/" && (
-            <p className="mt-2 text-xs">测试版本 · Version 0.1</p>
+            <p className="mt-2 text-xs">测试版本 · Version {__SITE_VERSION__}</p>
           )}
         </div>
       </div>
@@ -3563,27 +3566,6 @@ function OpinionDetailPage() {
           {"返回观点列表"}
         </Link>
       </div>
-    </div>
-  );
-}
-function ClassroomPage() {
-  return (
-    <div className="min-h-screen bg-background">
-      <section className="pt-32 pb-20 px-6">
-        <div className="max-w-6xl mx-auto">
-          <div className="mb-16">
-            <h1 className="text-4xl md:text-5xl leading-tight mb-6">
-              {"悦心教室"}
-            </h1>
-            <p className="text-xl text-muted-foreground leading-relaxed">
-              {"持续学习，共同成长"}
-            </p>
-          </div>
-          <div className="text-center text-muted-foreground">
-            {"内容正在完善中..."}
-          </div>
-        </div>
-      </section>
     </div>
   );
 }

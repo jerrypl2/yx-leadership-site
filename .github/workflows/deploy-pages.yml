@@ -12,10 +12,12 @@ permissions:
 
 concurrency:
   group: pages
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 jobs:
   build:
+    outputs:
+      version: ${{ steps.build-version.outputs.version }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
@@ -26,6 +28,12 @@ jobs:
       - name: Configure Pages
         uses: actions/configure-pages@v5
       - run: npm ci
+      - name: Advance the published homepage version
+        run: |
+          node scripts/site-version.mjs >> "$GITHUB_ENV"
+      - name: Record build version
+        id: build-version
+        run: echo "version=$SITE_VERSION" >> "$GITHUB_OUTPUT"
       - run: npm run build
       - run: npm run check
       - uses: actions/upload-pages-artifact@v4
@@ -42,3 +50,15 @@ jobs:
       - name: Deploy
         id: deployment
         uses: actions/deploy-pages@v4
+      - name: Verify the public homepage version
+        env:
+          EXPECTED: ${{ needs.build.outputs.version }}
+        run: |
+          for attempt in {1..12}; do
+            if curl --fail --silent --show-error --max-time 10 "https://www.amachina-yuexin.com/?release=$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT-$attempt" -o "$RUNNER_TEMP/yx-home.html" &&
+               grep -Fq "Version $EXPECTED</p>" "$RUNNER_TEMP/yx-home.html"; then
+              exit 0
+            fi
+            sleep 5
+          done
+          exit 1

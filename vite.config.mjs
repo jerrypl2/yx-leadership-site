@@ -1,7 +1,10 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 
+import { buildVersion } from "./scripts/site-version.mjs";
+
 export default defineConfig({
+  define: { __SITE_VERSION__: buildVersion() },
   base: './',
   build: {
     outDir: "dist/client",
