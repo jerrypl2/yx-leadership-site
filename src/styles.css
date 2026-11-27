@@ -1331,3 +1331,31 @@
 .business-subheading { margin: 1.2rem 0 .55rem; font-size: 1.1rem; }
 .enterprise-topic .business-button { margin-top: 1.35rem; }
 @media (max-width: 640px) { .business-page { padding: 6rem 1rem 3rem; } }
+
+.model-entrance { margin-top: .9rem; }
+.model-entrance a, .model-course a { text-decoration: underline; text-underline-offset: .22em; }
+.model-entrance a { display: inline-block; padding: .35rem 0; font-weight: 600; }
+.course-paths { display: flex; flex-wrap: wrap; gap: .6rem; margin-bottom: 1.25rem; }
+.course-paths a { padding: .65rem 1rem; border: 1px solid var(--border); border-radius: .45rem; }
+.course-paths a:hover, .model-overview a:hover { background: var(--muted); }
+#course-search, .model-dimension { scroll-margin-top: 6rem; }
+.model-overview { display: grid; grid-template-columns: repeat(4, 1fr); gap: .8rem; }
+.model-overview a { display: grid; align-content: start; gap: .45rem; padding: 1.05rem; border: 1px solid var(--border); border-radius: .6rem; }
+.model-overview strong { font-size: 1.15rem; }
+.model-overview span, .model-question { color: var(--muted-foreground); }
+.model-overview span { font-size: .92rem; line-height: 1.65; }
+.model-terms { display: flex; flex-wrap: wrap; gap: 0 .6rem; }
+.model-terms > span { white-space: nowrap; }
+.model-dimension { padding-top: 1.5rem; margin: 2.75rem 0; border-top: 1px solid var(--border); }
+.model-question { margin: .4rem 0 1.2rem; }
+.model-aspects { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1rem; }
+.model-aspects article { display: flex; flex-direction: column; gap: .7rem; padding: 1.15rem; border: 1px solid var(--border); border-radius: .6rem; }
+.model-aspects h3 { font-size: 1.3rem; font-weight: 600; }
+.model-aspects h4 { font-weight: 600; margin-bottom: .3rem; }
+.model-example { border-inline-start: 3px solid var(--border); padding-inline-start: .8rem; margin: .45rem 0; }
+.model-course { margin-top: auto; }
+.model-course p { margin-bottom: .4rem; }
+@media (max-width: 800px) {
+  .model-overview { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .model-aspects { grid-template-columns: 1fr; }
+}

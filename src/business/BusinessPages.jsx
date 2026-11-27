@@ -3,6 +3,7 @@ import { Link, useParams } from '../navigation.jsx';
 import { sessions, sessionDates } from '../classroom/catalog.js';
 import { courses } from './courses.js';
 import { topics, areaNames } from './topics.js';
+import { leadershipModelPath } from './leadership-model.js';
 
 export function CourseLinks({items}) {
   return <ul className="business-links">{items.map(c =>
@@ -17,7 +18,11 @@ export function CourseIndex() {
     <Link className="business-back" to="/classroom/">返回悦心教室</Link>
     <h1>课程咨询目录</h1>
     <p className="business-intro">按课程名称、曾用名或能力方向查找，查看内容后可直接咨询对应班次。</p>
-    <label className="course-search">查找课程<input type="search" placeholder="输入课程名、曾用名或能力方向" value={search} onChange={e=>setSearch(e.target.value)} /></label>
+    <nav className="course-paths" aria-label="选择查课方式">
+      <a href="#course-search">按课名查找</a>
+      <Link to={leadershipModelPath}>按领导力模型选课</Link>
+    </nav>
+    <label className="course-search">查找课程<input id="course-search" type="search" placeholder="输入课程名、曾用名或能力方向" value={search} onChange={e=>setSearch(e.target.value)} /></label>
     <p role="status" className="course-count">{matches.length ? '共 '+matches.length+' 门课程' : '未找到匹配的课程，请换一个关键词。'}</p>
     <ul className="course-index">{matches.map(c=><li key={c.id}>
       <Link to={'/courses/'+c.id+'/'}><small>{areaNames[c.area-1]}</small><h2>{c.title}</h2>

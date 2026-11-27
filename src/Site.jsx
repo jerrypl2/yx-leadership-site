@@ -9,6 +9,7 @@ import { Link, useParams, siteHref } from "./navigation.jsx";
 import { emptyContact, identifyAttempt, forgetAttempt, sendContact } from "./contact.js";
 import { topics } from "./business/topics.js";
 import { courses } from "./business/courses.js";
+import { leadershipModelPath, leadershipDimensions } from "./business/leadership-model.js";
 import { CourseLinks } from "./business/BusinessPages.jsx";
 import { ClassroomPage } from "./classroom/ClassroomPage.jsx";
 import { asset } from "./assets.js";
@@ -1628,6 +1629,10 @@ function CapabilityMapPage() {
                       <p className="text-base text-muted-foreground leading-relaxed">
                         {e.description}
                       </p>
+                      {e.id === 3 && <div className="model-entrance">
+                        <p>{leadershipDimensions.map(dimension=>dimension.title).join(' · ')}</p>
+                        <Link to={leadershipModelPath}>查看领导力模型</Link>
+                      </div>}
                     </div>
                   </div>
                   <div className="grid md:grid-cols-3 gap-8">
@@ -1687,10 +1692,12 @@ function CapabilityMapPage() {
 }
 function ContactPage({ initialValues } = {}) {
   const {search} = useLocation();
-  const topic = topics.find(t => t.id === new URLSearchParams(search).get('topic'));
+  const params = new URLSearchParams(search);
+  const topic = topics.find(t => t.id === params.get('topic'));
+  const aspect = topic && leadershipDimensions.flatMap(d=>d.aspects).find(a=>a.topic===topic.id && a.title===params.get('aspect'));
   const [formData, setFormData] = useState(() => ({
     ...emptyContact, ...initialValues,
-    message: initialValues?.message || (topic ? '我想咨询'+topic.name+'。' : ''),
+    message: initialValues?.message || (aspect ? '我想咨询「'+aspect.title+'」培养方案，了解《'+aspect.historicalCourse+'》的开设情况。' : topic ? '我想咨询'+topic.name+'。' : ''),
   }));
   const [ready, setReady] = useState(false);
   const [busy, setBusy] = useState(false);

@@ -1,3 +1,5 @@
+import { leadershipModelPath } from './leadership-model.js';
+
 // Course IDs match the legacy catalogue. Sessions keep their own separate IDs.
 export const courses = [
   {
@@ -112,6 +114,7 @@ export const courses = [
 
 export function businessPageTitle(pathname) {
   const path = pathname.replace(/\/$/, '');
+  if (path+'/' === leadershipModelPath) return '领导力模型';
   if (path === '/courses') return '课程咨询目录';
   if (path === '/solutions') return '企业培训咨询';
   const match = /^\/courses\/(\d+)$/.exec(path);

@@ -1,4 +1,5 @@
 import { nextVersion, buildVersion } from '../scripts/site-version.mjs';
+import { leadershipDimensions, leadershipModelPath } from '../src/business/leadership-model.js';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFile, stat } from 'node:fs/promises';
@@ -73,6 +74,26 @@ test('contact form preserves the original required fields', async () => {
   }
   assert.match(html, /<input[^>]*type="email"/);
   assert.match(html, /<button[^>]*type="submit"/);
+});
+
+test('the published leadership model preserves its hierarchy, examples, and course or inquiry destinations', async () => {
+  const model = await readFile(join(output, leadershipModelPath.slice(1), 'index.html'), 'utf8');
+  assert.ok(model.includes('<title>领导力模型 · 悦心领导力中心</title>'));
+  assert.equal(leadershipDimensions.length,4);
+  assert.equal((model.match(/<h4>工作示例<\/h4>/g) || []).length,12);
+  for (const dimension of leadershipDimensions) {
+    assert.equal(dimension.aspects.length,3);
+    assert.ok(model.includes('id="'+dimension.id+'"'));
+    for (const aspect of dimension.aspects) {
+      assert.ok(model.includes('<h3>'+aspect.title+'</h3>') && model.includes(aspect.behavior) && model.includes(aspect.example));
+      if (aspect.courses) {
+        for (const id of aspect.courses) assert.ok(model.includes('courses/'+id+'/'));
+      } else {
+        assert.ok(model.includes(aspect.historicalCourse));
+        assert.ok(unescape(model).includes('contact/?'+new URLSearchParams({topic:aspect.topic,aspect:aspect.title})));
+      }
+    }
+  }
 });
 
 test('all 14 original image files are bundled', async () => {

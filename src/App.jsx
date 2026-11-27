@@ -7,13 +7,16 @@ import {
 } from './Site.jsx';
 import { businessPageTitle } from './business/courses.js';
 import { CourseIndex, CourseDetail, BusinessIndex } from './business/BusinessPages.jsx';
+import { LeadershipModelPage } from './business/LeadershipModelPage.jsx';
+import { leadershipModelPath } from './business/leadership-model.js';
 import { Link } from './navigation.jsx';
 
 export function App({ initialContactValues } = {}) {
   const {pathname, hash, key} = useLocation();
   const navigation = useNavigationType();
   useLayoutEffect(() => {
-    if (navigation !== 'POP' && /^\/contact\/?$/.test(pathname) && !hash) {
+    const path = pathname.replace(/\/$/, '');
+    if (navigation !== 'POP' && !hash && (path === '/contact' || path+'/' === leadershipModelPath || /^\/courses(?:\/\d+)?$/.test(path))) {
       const scrollToTop = () => window.scrollTo({left: 0, top: 0, behavior: 'instant'});
       scrollToTop();
       // A smooth anchor scroll from the previous route can finish on the next frame.
@@ -37,6 +40,7 @@ export function App({ initialContactValues } = {}) {
       <Route path="/" element={<Layout><HomePage /></Layout>} />
       <Route path="/about" element={<Layout><AboutPage /></Layout>} />
       <Route path="/capability-map" element={<Layout><CapabilityMapPage /></Layout>} />
+      <Route path={leadershipModelPath} element={<Layout><LeadershipModelPage /></Layout>} />
       <Route path="/methods" element={<Layout><MethodsPage /></Layout>} />
       <Route path="/contact" element={<Layout><ContactPage initialValues={initialDraft} /></Layout>} />
       <Route path="/cases" element={<Layout><CasesPage /></Layout>} />
