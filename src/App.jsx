@@ -9,6 +9,8 @@ import { businessPageTitle } from './business/courses.js';
 import { CourseIndex, CourseDetail, BusinessIndex } from './business/BusinessPages.jsx';
 import { LeadershipModelPage } from './business/LeadershipModelPage.jsx';
 import { leadershipModelPath } from './business/leadership-model.js';
+import { CustomersPage } from './business/CustomersPage.jsx';
+import { customersPath } from './business/customer-feedback.js';
 import { Link } from './navigation.jsx';
 
 export function App({ initialContactValues } = {}) {
@@ -37,6 +39,7 @@ export function App({ initialContactValues } = {}) {
     <Routes>
       <Route path="/" element={<Layout><HomePage /></Layout>} />
       <Route path="/about" element={<Layout><AboutPage /></Layout>} />
+      <Route path={customersPath} element={<Layout><CustomersPage /></Layout>} />
       <Route path="/capability-map" element={<Layout><CapabilityMapPage /></Layout>} />
       <Route path={leadershipModelPath} element={<Layout><LeadershipModelPage /></Layout>} />
       <Route path="/methods" element={<Layout><MethodsPage /></Layout>} />

@@ -11,6 +11,7 @@ import { topics } from "./business/topics.js";
 import { courses } from "./business/courses.js";
 import { leadershipModelPath, leadershipDimensions } from "./business/leadership-model.js";
 import { CourseLinks } from "./business/BusinessPages.jsx";
+import { customersPath } from "./business/customer-feedback.js";
 import { ClassroomPage } from "./classroom/ClassroomPage.jsx";
 import { asset } from "./assets.js";
 const logoSrc = asset(
@@ -95,6 +96,7 @@ function Footer() {
                 </Link>
               </li>
               <li><Link to="/classroom/" className="hover:text-foreground transition-colors">悦心教室</Link></li>
+              <li><Link to={customersPath} className="hover:text-foreground transition-colors">客户与口碑</Link></li>
               <li>
                 <Link
                   to="/about"
@@ -1389,6 +1391,7 @@ function AboutPage() {
                 }
               </p>
               <p>{"我们的工作，通常围绕这些问题展开。"}</p>
+              <Link to={customersPath} className="business-button">查看客户名录与反馈</Link>
             </div>
           </div>
         </div>
@@ -2016,9 +2019,10 @@ function CasesPage() {
           <h1 className="text-4xl md:text-5xl leading-tight mb-6 text-center">
             {"案例"}
           </h1>
-          <p className="text-xl text-muted-foreground text-center max-w-3xl mx-auto mb-20">
+          <p className="text-xl text-muted-foreground text-center max-w-3xl mx-auto mb-8">
             {"我们与客户一起，在真实业务场景中推动关键问题的解决"}
           </p>
+          <p className="business-entrance"><Link to={customersPath}>查看客户名录与反馈</Link></p>
           <div className="grid md:grid-cols-2 gap-8">
             {caseSummaries.map((e) => (
               <Link
@@ -2993,6 +2997,7 @@ function IndustryPage() {
             <p className="text-xl text-muted-foreground leading-relaxed mb-8">
               {t.description}
             </p>
+            <p className="business-links mb-8"><Link to={customersPath+'#directory'}>按行业查看客户名录</Link></p>
             <div className="relative h-[400px] rounded-2xl overflow-hidden mb-12">
               <ContentImageWithFallback
                 src={t.image}

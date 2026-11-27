@@ -4,6 +4,7 @@ import { sessions, sessionDates } from '../classroom/catalog.js';
 import { courses } from './courses.js';
 import { topics, areaNames } from './topics.js';
 import { leadershipModelPath } from './leadership-model.js';
+import { courseFeedback, customersPath } from './customer-feedback.js';
 
 export function CourseLinks({items}) {
   return <ul className="business-links">{items.map(c =>
@@ -48,6 +49,12 @@ export function CourseDetail() {
       {!course.outline && <p>本期大纲与练习安排待教务确认。</p>}
     </section>
     {course.format && <section><h2>学习方式参考</h2><p>{course.format}</p></section>}
+    {courseFeedback[id] && <section id="feedback" className="course-feedback">
+      <h2>往届课程反馈</h2>
+      <p className="business-meta">据旧站本课程页的公开评价匿名整理</p>
+      <p>{courseFeedback[id]}</p>
+      <Link className="business-back" to={customersPath+'#course-feedback'}>查看其他课程的反馈</Link>
+    </section>}
     <section><h2>咨询班次</h2>
       {upcoming.map(s=><div className="course-session" key={s.id}>
         <div><strong>{s.city} · {sessionDates(s)}</strong><p>参考班次 {s.id} · 待教务确认</p></div>

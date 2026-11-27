@@ -1,5 +1,6 @@
 import { nextVersion, buildVersion } from '../scripts/site-version.mjs';
 import { leadershipDimensions, leadershipModelPath } from '../src/business/leadership-model.js';
+import { customersPath, customerVoices, courseFeedback } from '../src/business/customer-feedback.js';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFile, stat } from 'node:fs/promises';
@@ -101,6 +102,26 @@ test('all 14 original image files are bundled', async () => {
   const files = [...new Set(Object.values(manifest))];
   assert.equal(files.length, 14);
   for (const file of files) assert.ok((await stat(join(output, 'media', file))).size > 100);
+});
+
+test('the customer directory and course-specific feedback are available in the static export', async () => {
+  const page = await readFile(join(output,customersPath,'index.html'),'utf8');
+  assert.ok(page.includes('<title>客户与口碑 · 悦心领导力中心</title>'));
+  const directory = JSON.parse(await readFile(join(root,'src/business/customer-directory.json'),'utf8'));
+  assert.equal(directory.length,14);
+  assert.equal(directory.reduce((count,group)=>count+group.names.length,0),507);
+  for (const {names} of directory) {
+    assert.equal(new Set(names).size,names.length);
+    for (const name of names) assert.ok(unescape(page).includes(name.replaceAll("'",'&#x27;').replaceAll('"','&quot;')));
+  }
+  for (const {text} of customerVoices) assert.ok(page.includes(text));
+  const {courses} = await import('../src/business/courses.js');
+  for (const {id} of courses) {
+    const coursePage = await readFile(join(output,'courses',id,'index.html'),'utf8');
+    assert.equal(coursePage.includes('id="feedback"'),Boolean(courseFeedback[id]));
+    assert.equal(page.includes('courses/'+id+'/#feedback'),Boolean(courseFeedback[id]));
+    if (courseFeedback[id]) assert.ok(coursePage.includes(courseFeedback[id]));
+  }
 });
 
 test('homepage version survives static export and increments as an integer on the next release', async () => {
