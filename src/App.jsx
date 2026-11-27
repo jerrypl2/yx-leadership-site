@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useState } from 'react';
 import { Routes, Route, useLocation, useNavigationType } from 'react-router-dom';
 import {
   Layout, HomePage, AboutPage, CapabilityMapPage, MethodsPage, ContactPage,
@@ -12,21 +12,16 @@ import { leadershipModelPath } from './business/leadership-model.js';
 import { Link } from './navigation.jsx';
 
 export function App({ initialContactValues } = {}) {
-  const {pathname, search, hash, key} = useLocation();
+  const {pathname, hash, key, state} = useLocation();
   const navigation = useNavigationType();
-  const path = pathname.replace(/\/$/, '');
-  const previousPath = useRef(path);
   useLayoutEffect(() => {
-    const enteringClassroom = path === '/classroom' && previousPath.current !== path && !search;
-    previousPath.current = path;
-    if (navigation !== 'POP' && !hash && (enteringClassroom || path === '/contact' || path+'/' === leadershipModelPath || /^\/courses(?:\/\d+)?$/.test(path))) {
-      const scrollToTop = () => window.scrollTo({left: 0, top: 0, behavior: 'instant'});
-      scrollToTop();
-      // A smooth anchor scroll from the previous route can finish on the next frame.
-      const frame = requestAnimationFrame(scrollToTop);
-      return () => cancelAnimationFrame(frame);
-    }
-  }, [path, search, hash, key, navigation]);
+    if (navigation === 'POP' || hash || state?.preserveScroll) return;
+    const scrollToTop = () => window.scrollTo({left: 0, top: 0, behavior: 'instant'});
+    scrollToTop();
+    // A smooth anchor scroll from the previous route can finish on the next frame.
+    const frame = requestAnimationFrame(scrollToTop);
+    return () => cancelAnimationFrame(frame);
+  }, [key, hash, navigation, state]);
   useEffect(() => {
     const title = businessPageTitle(pathname);
     document.title = title ? title+' · 悦心领导力中心' : 'YX Leadership Center';

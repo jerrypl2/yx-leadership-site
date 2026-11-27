@@ -76,7 +76,7 @@ export function ClassroomPage() {
   const visible = sessions.filter(item => !city || item.city === city);
   const activeRow = useRef(null);
   useEffect(() => { if (selected) activeRow.current?.scrollIntoView({block:'start'}); }, [selected]);
-  function filter(value) { setParams(value ? {city:value} : {}); }
+  function filter(value) { setParams(value ? {city:value} : {}, {state:{preserveScroll:true}}); }
   return <main className="classroom-page">
     <header className="classroom-heading">
       <h1>悦心教室</h1>
@@ -102,7 +102,7 @@ export function ClassroomPage() {
             <div className="classroom-row">
               <div className="classroom-date">{shortDates(session)}<small>{session.city}</small></div>
               <div><h3><Link className="course-title-link" to={'/courses/'+session.courseId+'/'}>{session.title}</Link></h3><p>待教务确认</p></div>
-              <Link to={'/classroom/?'+query.toString()} aria-expanded={expanded}
+              <Link to={'/classroom/?'+query.toString()} state={{preserveScroll:true}} aria-expanded={expanded}
                 aria-label={(expanded?'收起咨询：':'咨询班次：') + session.title}
                 className="classroom-action">{expanded ? '收起咨询' : '咨询班次'}</Link>
             </div>

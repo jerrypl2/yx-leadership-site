@@ -6,6 +6,31 @@ import { sessions } from '../src/classroom/catalog.js';
 import { leadershipDimensions, leadershipModelPath } from '../src/business/leadership-model.js';
 
 const base = process.argv.includes('--live') ? 'https://www.amachina-yuexin.com' : 'http://127.0.0.1:4183';
+
+async function checkHeaderScroll(page) {
+  const header=page.getByRole('banner');
+  const nav=header.getByRole('navigation',{name:'主导航'});
+  const links=[...await nav.getByRole('link').all(),header.getByRole('link',{name:'悦心领导力中心',exact:true})];
+  for (const link of links) {
+    await page.evaluate(()=>window.scrollTo({top:1100,behavior:'instant'}));
+    assert.ok(await page.evaluate(()=>scrollY>300));
+    const target=new URL(await link.getAttribute('href'),page.url());
+    await link.click();
+    await page.waitForURL(url=>url.pathname.replace(/\/$/,'')===target.pathname.replace(/\/$/,'') && url.hash===target.hash);
+    if (target.hash) {
+      await page.waitForFunction(()=>{
+        const top=document.querySelector('#solutions h2').getBoundingClientRect().top;
+        return scrollY>0 && top>=document.querySelector('header').getBoundingClientRect().bottom && top<innerHeight/2;
+      });
+    } else {
+      await page.waitForFunction(()=>{
+        const title=document.querySelector('h1')?.getBoundingClientRect();
+        return scrollY===0 && title && title.top>=0 && title.top<innerHeight;
+      });
+    }
+  }
+}
+
 const browser = await chromium.launch();
 try {
   const layout = await browser.newPage();
@@ -37,6 +62,7 @@ try {
     const context = await browser.newContext(options);
     const page = await context.newPage();
     await page.goto(base+'/');
+    await checkHeaderScroll(page);
     const mainNav=page.getByRole('navigation',{name:'主导航'});
     await mainNav.getByRole('link',{name:'领导力模型',exact:true}).click();
     await page.getByRole('heading',{name:'领导力模型',exact:true}).waitFor();
@@ -102,6 +128,15 @@ try {
     const coachingSession=sessions.find(s=>s.courseId==='6');
     await page.getByRole('form',{name:coachingSession.title+'班次咨询'}).waitFor();
     assert.equal(new URL(page.url()).searchParams.get('session'),coachingSession.id);
+    await page.waitForFunction(()=>{
+      const top=document.querySelector('a[aria-expanded="true"]').closest('li').getBoundingClientRect().top;
+      return scrollY>300 && Math.abs(top-80)<5;
+    });
+    await page.getByRole('link',{name:'收起咨询：'+coachingSession.title}).click();
+    await page.waitForURL(url=>!url.searchParams.has('session'));
+    assert.ok(await page.evaluate(()=>scrollY>300));
+    await mainNav.getByRole('link',{name:'悦心教室',exact:true}).click();
+    await page.waitForFunction(()=>scrollY===0);
     await page.goto(base+leadershipModelPath+'#operations');
     await page.waitForFunction(()=>Math.abs(document.querySelector('#operations').getBoundingClientRect().top-96)<8);
     assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));

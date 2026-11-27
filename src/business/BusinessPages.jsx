@@ -51,7 +51,7 @@ export function CourseDetail() {
     <section><h2>咨询班次</h2>
       {upcoming.map(s=><div className="course-session" key={s.id}>
         <div><strong>{s.city} · {sessionDates(s)}</strong><p>参考班次 {s.id} · 待教务确认</p></div>
-        <Link className="business-button" to={'/classroom/?session='+s.id}>咨询此班次</Link>
+        <Link className="business-button" to={'/classroom/?session='+s.id} state={{preserveScroll:true}}>咨询此班次</Link>
       </div>)}
     </section>
   </main>;
