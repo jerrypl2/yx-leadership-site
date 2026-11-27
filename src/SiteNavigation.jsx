@@ -7,6 +7,10 @@ import { customersPath } from './business/customer-feedback.js';
 
 const logoSrc = asset('https://botany-solid-84734790.figma.site/_components/v2/f51628a311779c982c4d8e2f61c4e7fbf4e590ff/image-1.428ac48c.png');
 
+const classroom = { label: '悦心教室', to: '/classroom/', footer: false };
+const leadershipModel = { label: '领导力模型', to: leadershipModelPath, footer: false };
+const shortcuts = [leadershipModel, classroom];
+
 const menu = [
   { title: '企业服务', links: [
     { label: '解决方案', to: '/#solutions' },
@@ -15,10 +19,10 @@ const menu = [
     { label: '方法与实现', to: '/methods/' },
   ] },
   { title: '课程体系', links: [
-    { label: '领导力模型', to: leadershipModelPath, shortcut: true },
-    { label: '组织能力地图', to: '/capability-map/' },
+    classroom,
     { label: '课程咨询目录', to: '/courses/' },
-    { label: '悦心教室', to: '/classroom/', shortcut: true },
+    { label: '组织能力地图', to: '/capability-map/' },
+    leadershipModel,
   ] },
   { title: '案例与观点', links: [
     { label: '案例', to: '/cases/' },
@@ -30,8 +34,6 @@ const menu = [
     { label: '联系我们', to: '/contact/' },
   ] },
 ];
-
-const shortcuts = menu.flatMap(group => group.links.filter(item => item.shortcut));
 
 function MenuLink({ item }) {
   const { pathname, hash } = useLocation();
@@ -116,7 +118,10 @@ export function Footer() {
           <p className="text-sm text-muted-foreground">在关键时刻，让事情真正向前发生</p>
         </div>
         <nav aria-label="页脚导航" className="footer-navigation">
-          {menu.map(group => <div key={group.title}><h2>{group.title}</h2><MenuLinks links={group.links} /></div>)}
+          {menu.map(group => <div key={group.title}>
+            <h2>{group.title}</h2>
+            <MenuLinks links={group.links.filter(item => item.footer !== false)} />
+          </div>)}
         </nav>
       </div>
       <div className="pt-8 border-t border-border text-sm text-muted-foreground text-center">

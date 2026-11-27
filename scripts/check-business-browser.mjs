@@ -25,12 +25,21 @@ async function checkHeaderScroll(page) {
 
   for (const group of expected) {
     const section = groups.locator('.menu-group').filter({has:page.locator('summary', {hasText:group.title})});
-    for (const item of group.links) {
+    let links = group.links;
+    if (group.title === '课程体系') {
+      assert.deepEqual(links.map(link => link.name), ['课程咨询目录','组织能力地图']);
+      links = [
+        {name:'悦心教室', url:base+'/classroom/'},
+        ...links,
+        {name:'领导力模型', url:base+leadershipModelPath},
+      ];
+    }
+    for (const item of links) {
       await page.evaluate(() => window.scrollTo({top:1100,behavior:'instant'}));
       assert.ok(await page.evaluate(() => scrollY > 300));
       if (mobile) await toggle.click();
       await section.locator('summary').click();
-      assert.deepEqual(await section.getByRole('link').allTextContents(),group.links.map(link => link.name));
+      assert.deepEqual(await section.getByRole('link').allTextContents(),links.map(link => link.name));
       const destination = section.getByRole('link', {name:item.name,exact:true});
       assert.equal(await destination.evaluate(a => a.href),item.url);
       await destination.click();

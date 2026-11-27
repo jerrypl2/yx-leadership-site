@@ -29,8 +29,10 @@ try {
     await page.goto(base+'/?qa='+crypto.randomUUID());
     const footer=page.locator('footer');
     await footer.getByText(/Version 0\.\d+/).waitFor();
-    assert.equal(await page.getByRole('banner').getByRole('link',{name:'悦心教室',exact:true}).count(),1);
-    await footer.getByRole('link',{name:'悦心教室'}).click();
+    const classroomShortcut=page.getByRole('banner').getByRole('link',{name:'悦心教室',exact:true});
+    assert.equal(await classroomShortcut.count(),1);
+    assert.equal(await footer.getByRole('link',{name:'悦心教室',exact:true}).count(),0);
+    await classroomShortcut.click();
     const actions=page.getByRole('link',{name:/^咨询班次：/});
     await actions.first().waitFor();
     assert.equal(await actions.count(),15);
