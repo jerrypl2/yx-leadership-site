@@ -7,28 +7,71 @@ import { leadershipDimensions, leadershipModelPath } from '../src/business/leade
 
 const base = process.argv.includes('--live') ? 'https://www.amachina-yuexin.com' : 'http://127.0.0.1:4183';
 
+const groupNames = ['企业服务','课程体系','案例与观点','关于我们'];
+
 async function checkHeaderScroll(page) {
-  const header=page.getByRole('banner');
-  const nav=header.getByRole('navigation',{name:'主导航'});
-  const links=[...await nav.getByRole('link').all(),header.getByRole('link',{name:'悦心领导力中心',exact:true})];
-  for (const link of links) {
-    await page.evaluate(()=>window.scrollTo({top:1100,behavior:'instant'}));
-    assert.ok(await page.evaluate(()=>scrollY>300));
-    const target=new URL(await link.getAttribute('href'),page.url());
-    await link.click();
-    await page.waitForURL(url=>url.pathname.replace(/\/$/,'')===target.pathname.replace(/\/$/,'') && url.hash===target.hash);
-    if (target.hash) {
-      await page.waitForFunction(()=>{
-        const top=document.querySelector('#solutions h2').getBoundingClientRect().top;
-        return scrollY>0 && top>=document.querySelector('header').getBoundingClientRect().bottom && top<innerHeight/2;
-      });
-    } else {
-      await page.waitForFunction(()=>{
-        const title=document.querySelector('h1')?.getBoundingClientRect();
-        return scrollY===0 && title && title.top>=0 && title.top<innerHeight;
-      });
+  const header = page.getByRole('banner');
+  const nav = header.getByRole('navigation', {name:'主导航'});
+  const footer = page.getByRole('navigation', {name:'页脚导航'});
+  const mobile = page.viewportSize().width < 768;
+  const groups = nav.locator(mobile ? '.mobile-groups' : '.desktop-groups');
+  const toggle = nav.locator('.mobile-menu > summary');
+  const expected = await footer.locator(':scope > div').evaluateAll(sections => sections.map(section => ({
+    title: section.querySelector('h2').textContent,
+    links: [...section.querySelectorAll('a')].map(a => ({name:a.textContent, url:a.href})),
+  })));
+  assert.deepEqual(expected.map(group => group.title),groupNames);
+  assert.ok(expected.find(group => group.title === '关于我们').links.some(link => link.name === '客户与口碑'));
+
+  for (const group of expected) {
+    const section = groups.locator('.menu-group').filter({has:page.locator('summary', {hasText:group.title})});
+    for (const item of group.links) {
+      await page.evaluate(() => window.scrollTo({top:1100,behavior:'instant'}));
+      assert.ok(await page.evaluate(() => scrollY > 300));
+      if (mobile) await toggle.click();
+      await section.locator('summary').click();
+      assert.deepEqual(await section.getByRole('link').allTextContents(),group.links.map(link => link.name));
+      const destination = section.getByRole('link', {name:item.name,exact:true});
+      assert.equal(await destination.evaluate(a => a.href),item.url);
+      await destination.click();
+      await page.waitForURL(item.url);
+      await page.waitForFunction(() => !document.querySelector('header details[open]'));
+      const hash = new URL(item.url).hash;
+      if (hash) {
+        await page.waitForFunction(hash => {
+          const top=document.querySelector(hash+' h2').getBoundingClientRect().top;
+          return scrollY > 0 && top >= document.querySelector('header').getBoundingClientRect().bottom && top < innerHeight/2;
+        },hash);
+      } else {
+        await page.waitForFunction(() => {
+          const title=document.querySelector('h1')?.getBoundingClientRect();
+          return scrollY === 0 && title && title.top >= 0 && title.top < innerHeight;
+        });
+      }
     }
   }
+  await page.evaluate(() => window.scrollTo({top:1100,behavior:'instant'}));
+  await header.getByRole('link', {name:'悦心领导力中心'}).click();
+  await page.waitForFunction(() => location.pathname.endsWith('/') && !location.hash && scrollY === 0);
+
+  if (mobile) await toggle.click();
+  const trigger = groups.locator('summary').filter({hasText:'关于我们'});
+  await trigger.focus();
+  await page.keyboard.press('Enter');
+  await page.keyboard.press('Tab');
+  assert.equal(await page.evaluate(() => document.activeElement.textContent), '中心介绍');
+  await page.keyboard.press('Escape');
+  assert.ok(await trigger.evaluate(el => document.activeElement === el && !el.parentElement.open));
+  if (mobile) {
+    await page.keyboard.press('Escape');
+    assert.ok(await toggle.evaluate(el => document.activeElement === el && !el.parentElement.open));
+    await toggle.click();
+  }
+  await trigger.click();
+  await groups.locator('summary').filter({hasText:'课程体系'}).click();
+  assert.equal(await groups.locator('details[open]').count(),1);
+  await page.mouse.click(2,150);
+  assert.equal(await header.locator('details[open]').count(),0);
 }
 
 const browser = await chromium.launch();
@@ -39,14 +82,14 @@ try {
     await layout.setViewportSize({width,height:800});
     const header = layout.getByRole('banner');
     const nav = header.getByRole('navigation',{name:'主导航'});
-    const expected = width < 768 ? ['领导力模型','悦心教室']
-      : ['解决方案','组织能力地图','领导力模型','方法与实现','案例','观点','悦心教室','关于我们'];
-    assert.deepEqual(await nav.getByRole('link').allTextContents(),expected);
-    const visible = await header.getByRole('link').all();
+    assert.deepEqual(await nav.getByRole('link').allTextContents(),['领导力模型','悦心教室']);
+    const visibleTriggers = nav.locator('summary:visible');
+    assert.deepEqual(await visibleTriggers.allTextContents(), width < 768 ? ['菜单'] : groupNames);
+    const controls = header.locator('a:visible, summary:visible');
     let previousRight=0;
-    for (const link of visible) {
-      const box=await link.boundingBox();
-      assert.ok(box && box.x>=previousRight-1 && box.x+box.width<=width+1, 'Header links must fit at '+width);
+    for (const control of await controls.all()) {
+      const box=await control.boundingBox();
+      assert.ok(box && box.width>0 && box.x>=previousRight-1 && box.x+box.width<=width+1, 'Header controls must fit at '+width);
       previousRight=box.x+box.width;
     }
   }

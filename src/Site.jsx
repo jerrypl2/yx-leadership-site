@@ -5,7 +5,7 @@
  */
 import { createElement, forwardRef, useEffect, useRef, useState } from "react";
 import { useLocation } from "react-router-dom";
-import { Link, useParams, siteHref } from "./navigation.jsx";
+import { Link, useParams } from "./navigation.jsx";
 import { emptyContact, identifyAttempt, forgetAttempt, sendContact } from "./contact.js";
 import { topics } from "./business/topics.js";
 import { courses } from "./business/courses.js";
@@ -14,118 +14,7 @@ import { CourseLinks } from "./business/BusinessPages.jsx";
 import { customersPath } from "./business/customer-feedback.js";
 import { ClassroomPage } from "./classroom/ClassroomPage.jsx";
 import { asset } from "./assets.js";
-const logoSrc = asset(
-  "https://botany-solid-84734790.figma.site/_components/v2/f51628a311779c982c4d8e2f61c4e7fbf4e590ff/image-1.428ac48c.png",
-);
-function Header() {
-  return (
-    <header className="fixed top-0 left-0 right-0 bg-background/95 backdrop-blur-sm border-b border-border z-50">
-      <div className="site-header-inner max-w-7xl mx-auto flex items-center justify-between">
-        <Link to="/">
-          <img src={logoSrc} alt="悦心领导力中心" className="h-8" />
-        </Link>
-        <nav className="site-navigation text-sm" aria-label="主导航">
-          <a href={siteHref("/#solutions")}>解决方案</a>
-          <Link to="/capability-map">组织能力地图</Link>
-          <Link className="mobile-shortcut" to={leadershipModelPath}>领导力模型</Link>
-          <Link to="/methods">方法与实现</Link>
-          <Link to="/cases">案例</Link>
-          <Link to="/opinions">观点</Link>
-          <Link className="mobile-shortcut" to="/classroom/">悦心教室</Link>
-          <Link to="/about">关于我们</Link>
-        </nav>
-      </div>
-    </header>
-  );
-}
-function Footer() {
-  const { pathname } = useLocation();
-  return (
-    <footer className="py-12 px-6 border-t border-border">
-      <div className="max-w-7xl mx-auto">
-        <div className="grid md:grid-cols-2 gap-12 mb-8">
-          <div>
-            <div className="flex items-center gap-3 mb-4">
-              <img src={logoSrc} alt="悦心领导力中心" className="h-8" />
-            </div>
-            <p className="text-sm text-muted-foreground">
-              {"在关键时刻，让事情真正向前发生"}
-            </p>
-          </div>
-          <div>
-            <h4 className="mb-4">{"导航"}</h4>
-            <ul className="space-y-2 text-sm text-muted-foreground">
-              <li>
-                <a
-                  href={siteHref("/#solutions")}
-                  className="hover:text-foreground transition-colors"
-                >
-                  {"解决方案"}
-                </a>
-              </li>
-              <li>
-                <Link
-                  to="/capability-map"
-                  className="hover:text-foreground transition-colors"
-                >
-                  {"组织能力地图"}
-                </Link>
-              </li>
-              <li>
-                <Link
-                  to="/methods"
-                  className="hover:text-foreground transition-colors"
-                >
-                  {"方法与实现"}
-                </Link>
-              </li>
-              <li>
-                <Link
-                  to="/cases"
-                  className="hover:text-foreground transition-colors"
-                >
-                  {"案例"}
-                </Link>
-              </li>
-              <li>
-                <Link
-                  to="/opinions"
-                  className="hover:text-foreground transition-colors"
-                >
-                  {"观点"}
-                </Link>
-              </li>
-              <li><Link to="/classroom/" className="hover:text-foreground transition-colors">悦心教室</Link></li>
-              <li><Link to={customersPath} className="hover:text-foreground transition-colors">客户与口碑</Link></li>
-              <li>
-                <Link
-                  to="/about"
-                  className="hover:text-foreground transition-colors"
-                >
-                  {"关于我们"}
-                </Link>
-              </li>
-              <li>
-                <Link
-                  to="/contact"
-                  className="hover:text-foreground transition-colors"
-                >
-                  {"联系我们"}
-                </Link>
-              </li>
-            </ul>
-          </div>
-        </div>
-        <div className="pt-8 border-t border-border text-sm text-muted-foreground text-center">
-          {"© 2026 上海美鼎企业管理咨询有限公司。保留所有权利。"}
-          {pathname === "/" && (
-            <p className="mt-2 text-xs">测试版本 · Version {__SITE_VERSION__}</p>
-          )}
-        </div>
-      </div>
-    </footer>
-  );
-}
+import { Header, Footer } from "./SiteNavigation.jsx";
 const IMAGE_FALLBACK =
   "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iODgiIGhlaWdodD0iODgiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgc3Ryb2tlPSIjMDAwIiBzdHJva2UtbGluZWpvaW49InJvdW5kIiBvcGFjaXR5PSIuMyIgZmlsbD0ibm9uZSIgc3Ryb2tlLXdpZHRoPSIzLjciPjxyZWN0IHg9IjE2IiB5PSIxNiIgd2lkdGg9IjU2IiBoZWlnaHQ9IjU2IiByeD0iNiIvPjxwYXRoIGQ9Im0xNiA1OCAxNi0xOCAzMiAzMiIvPjxjaXJjbGUgY3g9IjUzIiBjeT0iMzUiIHI9IjciLz48L3N2Zz4KCg==";
 function ImageWithFallback(e) {

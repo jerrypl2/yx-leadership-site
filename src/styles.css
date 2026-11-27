@@ -1255,15 +1255,51 @@
   20%, 50% { opacity: 0; }
 }
 
-.site-header-inner { gap: .75rem; padding: .625rem clamp(.75rem, 2vw, 1.5rem); }
-.site-navigation { display: flex; align-items: center; gap: .9rem; white-space: nowrap; }
-.site-navigation a { display: none; align-items: center; min-height: 2.75rem; }
-.site-navigation .mobile-shortcut { display: inline-flex; }
-.site-navigation a:hover, .site-navigation a:focus-visible { text-decoration: underline; text-underline-offset: .25em; }
+/* The header groups and footer columns share the same navigation entries. */
+.site-header-inner { display: flex; align-items: center; justify-content: space-between; gap: .5rem; padding: .625rem clamp(.65rem, 2vw, 1.5rem); }
+.header-brand { flex: 0 1 auto; min-width: 0; }
+.header-brand img { width: auto; height: auto; max-height: 2rem; max-width: 100%; }
+.site-navigation, .header-shortcuts { display: flex; align-items: center; gap: .65rem; }
+.site-navigation { flex-shrink: 0; font-size: .875rem; white-space: nowrap; }
+.site-navigation summary { display: flex; align-items: center; justify-content: space-between; gap: .45rem; min-height: 2.75rem; cursor: pointer; list-style: none; }
+.site-navigation summary::-webkit-details-marker { display: none; }
+.site-navigation summary::after { content: ''; width: .42rem; height: .42rem; border: solid currentColor; border-width: 0 1.5px 1.5px 0; transform: rotate(45deg) translateY(-2px); }
+.site-navigation details[open] > summary::after { transform: rotate(225deg) translate(-1px,-1px); }
+.site-navigation a { display: flex; align-items: center; min-height: 2.75rem; }
+.header-shortcuts a, .menu-group > summary { padding: 0 .4rem; }
+.site-navigation a:hover, .site-navigation summary:hover, .footer-navigation a:hover { text-decoration: underline; text-underline-offset: .25em; }
+.site-navigation a:focus-visible, .site-navigation summary:focus-visible, .footer-navigation a:focus-visible { outline: 2px solid currentColor; outline-offset: 2px; border-radius: .2rem; }
+.site-navigation a[aria-current], .footer-navigation a[aria-current] { text-decoration: underline; text-underline-offset: .25em; }
+.desktop-groups { display: none; }
+.mobile-menu > summary { padding: 0 .25rem 0 .65rem; }
+.mobile-groups, .desktop-groups .menu-group > ul {
+  background: var(--background); border: 1px solid var(--border); border-radius: .7rem;
+  box-shadow: 0 .55rem 1.6rem rgba(0,0,0,.1); overflow-y: auto; overscroll-behavior: contain;
+  max-height: calc(100dvh - 5rem);
+}
+.mobile-groups { position: absolute; inset: 100% .65rem auto; margin-top: .25rem; padding: .4rem .85rem; }
+.mobile-groups .menu-group + .menu-group { border-top: 1px solid var(--border); }
+.mobile-groups .menu-group > summary { font-weight: 600; }
+.mobile-groups ul { margin-bottom: .4rem; }
+.mobile-groups a { padding: .35rem 1rem; }
+.menu-group a:hover { background: var(--muted); border-radius: .35rem; }
+.site-footer-inner { display: grid; gap: 2rem; }
+.footer-navigation { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 1.5rem; font-size: .875rem; }
+.footer-navigation h2 { font-size: 1rem; font-weight: 600; margin-bottom: .45rem; }
+.footer-navigation a { display: inline-block; padding: .4rem 0; color: var(--muted-foreground); }
+@media (max-width: 24rem) {
+  .site-navigation, .header-shortcuts { gap: .2rem; }
+  .header-shortcuts a { padding: 0 .22rem; }
+}
 @media (min-width: 48rem) {
-  .site-navigation { gap: 0; color: var(--muted-foreground); }
-  .site-navigation a { display: inline-flex; }
-  .site-navigation a + a::before { content: ''; height: .9em; width: 1px; background: var(--border); margin-inline: clamp(.45rem, 1.1vw, 1.25rem); }
+  .mobile-menu { display: none; }
+  .desktop-groups { display: flex; align-items: center; gap: clamp(.3rem,1vw,1.25rem); }
+  .desktop-groups .menu-group { position: relative; }
+  .desktop-groups .menu-group > ul { position: absolute; top: 100%; left: 0; min-width: 10.5rem; padding: .35rem; }
+  .desktop-groups a { padding-inline: .8rem; }
+  .header-shortcuts { padding-left: .9rem; border-left: 1px solid var(--border); }
+  .site-footer-inner { grid-template-columns: minmax(12rem,1fr) 2.4fr; gap: 3rem; }
+  .footer-navigation { grid-template-columns: repeat(4,minmax(0,1fr)); }
 }
 
 /* Classroom schedule and its inline inquiry form. */
