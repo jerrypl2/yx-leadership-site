@@ -7,10 +7,6 @@ import { customersPath } from './business/customer-feedback.js';
 
 const logoSrc = asset('https://botany-solid-84734790.figma.site/_components/v2/f51628a311779c982c4d8e2f61c4e7fbf4e590ff/image-1.428ac48c.png');
 
-const classroom = { label: '悦心教室', to: '/classroom/', footer: false };
-const leadershipModel = { label: '领导力模型', to: leadershipModelPath, footer: false };
-const shortcuts = [leadershipModel, classroom];
-
 const menu = [
   { title: '企业服务', links: [
     { label: '解决方案', to: '/#solutions' },
@@ -19,10 +15,10 @@ const menu = [
     { label: '方法与实现', to: '/methods/' },
   ] },
   { title: '课程体系', links: [
-    classroom,
+    { label: '悦心教室', to: '/classroom/' },
     { label: '课程咨询目录', to: '/courses/' },
     { label: '组织能力地图', to: '/capability-map/' },
-    leadershipModel,
+    { label: '领导力模型', to: leadershipModelPath },
   ] },
   { title: '案例与观点', links: [
     { label: '案例', to: '/cases/' },
@@ -98,7 +94,6 @@ export function Header() {
           if (event.relatedTarget && !event.currentTarget.contains(event.relatedTarget)) closeMenus(event.currentTarget);
         }}>
         <MenuGroups layout="desktop" />
-        <div className="header-shortcuts">{shortcuts.map(item => <MenuLink item={item} key={item.to} />)}</div>
         <details className="mobile-menu">
           <summary>菜单</summary>
           <MenuGroups layout="mobile" />
@@ -120,7 +115,7 @@ export function Footer() {
         <nav aria-label="页脚导航" className="footer-navigation">
           {menu.map(group => <div key={group.title}>
             <h2>{group.title}</h2>
-            <MenuLinks links={group.links.filter(item => item.footer !== false)} />
+            <MenuLinks links={group.links} />
           </div>)}
         </nav>
       </div>

@@ -22,24 +22,19 @@ async function checkHeaderScroll(page) {
   })));
   assert.deepEqual(expected.map(group => group.title),groupNames);
   assert.ok(expected.find(group => group.title === '关于我们').links.some(link => link.name === '客户与口碑'));
+  assert.deepEqual(expected.find(group => group.title === '课程体系').links.map(link => link.name),
+    ['悦心教室','课程咨询目录','组织能力地图','领导力模型']);
 
   for (const group of expected) {
     const section = groups.locator('.menu-group').filter({has:page.locator('summary', {hasText:group.title})});
-    let links = group.links;
-    if (group.title === '课程体系') {
-      assert.deepEqual(links.map(link => link.name), ['课程咨询目录','组织能力地图']);
-      links = [
-        {name:'悦心教室', url:base+'/classroom/'},
-        ...links,
-        {name:'领导力模型', url:base+leadershipModelPath},
-      ];
-    }
-    for (const item of links) {
+    for (const item of group.links) {
       await page.evaluate(() => window.scrollTo({top:1100,behavior:'instant'}));
       assert.ok(await page.evaluate(() => scrollY > 300));
       if (mobile) await toggle.click();
       await section.locator('summary').click();
-      assert.deepEqual(await section.getByRole('link').allTextContents(),links.map(link => link.name));
+      assert.deepEqual(await section.getByRole('link').allTextContents(),group.links.map(link => link.name));
+      const panel=await section.locator('ul').boundingBox();
+      assert.ok(panel && panel.x>=0 && panel.x+panel.width<=page.viewportSize().width+1);
       const destination = section.getByRole('link', {name:item.name,exact:true});
       assert.equal(await destination.evaluate(a => a.href),item.url);
       await destination.click();
@@ -91,7 +86,7 @@ try {
     await layout.setViewportSize({width,height:800});
     const header = layout.getByRole('banner');
     const nav = header.getByRole('navigation',{name:'主导航'});
-    assert.deepEqual(await nav.getByRole('link').allTextContents(),['领导力模型','悦心教室']);
+    assert.equal(await nav.getByRole('link').count(),0);
     const visibleTriggers = nav.locator('summary:visible');
     assert.deepEqual(await visibleTriggers.allTextContents(), width < 768 ? ['菜单'] : groupNames);
     const controls = header.locator('a:visible, summary:visible');
@@ -115,19 +110,19 @@ try {
     const page = await context.newPage();
     await page.goto(base+'/');
     await checkHeaderScroll(page);
-    const mainNav=page.getByRole('navigation',{name:'主导航'});
-    await mainNav.getByRole('link',{name:'领导力模型',exact:true}).click();
+    const footerNav=page.getByRole('navigation',{name:'页脚导航'});
+    await footerNav.getByRole('link',{name:'领导力模型',exact:true}).click();
     await page.getByRole('heading',{name:'领导力模型',exact:true}).waitFor();
     assert.equal(new URL(page.url()).pathname,leadershipModelPath);
     await page.locator('footer').scrollIntoViewIfNeeded();
-    await mainNav.getByRole('link',{name:'悦心教室',exact:true}).click();
+    await footerNav.getByRole('link',{name:'悦心教室',exact:true}).click();
     const classroomNav=page.getByRole('navigation',{name:'悦心教室选课方式'});
     await classroomNav.waitFor();
     await page.waitForFunction(()=>window.scrollY===0);
     await classroomNav.getByRole('link',{name:'按领导力模型选课',exact:true}).click();
     await page.getByRole('heading',{name:'领导力模型',exact:true}).waitFor();
     assert.equal(new URL(page.url()).pathname,leadershipModelPath);
-    await mainNav.getByRole('link',{name:'悦心教室',exact:true}).click();
+    await footerNav.getByRole('link',{name:'悦心教室',exact:true}).click();
     const contactLink=page.locator('footer').getByRole('link',{name:'联系我们',exact:true});
     for (let n=0;n<2;n++) {
       await contactLink.scrollIntoViewIfNeeded();
@@ -187,7 +182,7 @@ try {
     await page.getByRole('link',{name:'收起咨询：'+coachingSession.title}).click();
     await page.waitForURL(url=>!url.searchParams.has('session'));
     assert.ok(await page.evaluate(()=>scrollY>300));
-    await mainNav.getByRole('link',{name:'悦心教室',exact:true}).click();
+    await footerNav.getByRole('link',{name:'悦心教室',exact:true}).click();
     await page.waitForFunction(()=>scrollY===0);
     await page.goto(base+leadershipModelPath+'#operations');
     await page.waitForFunction(()=>Math.abs(document.querySelector('#operations').getBoundingClientRect().top-96)<8);
